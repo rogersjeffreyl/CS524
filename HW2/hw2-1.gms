@@ -24,28 +24,18 @@ parameters
          small  300  /; 
          
 variables
- num_valves_per_supplier(suppliers, valve_types) "number of valves purchased from each supplier";
+ num_valves_per_supplier(suppliers) "number of valves purchased from each supplier";
 
+num_valves_per_supplier.up(suppliers)=700;
 equations
-  valve_limit(suppliers),
-  per_month_valve_purchase(valve_types),
-  valve_percentage_per_supplier(suppliers,  valve_types),  
-  cost_of_valve_purchase ; 
+  cost_of_valve_acquisition "cost of acquiring the valves",
+  count_per_valve_type(valve_types);  	
 
-variables 
-valves_per_supplier(suppliers) = sum (valve_types , num_valves_per_supplier(suppliers, valve_types));
 
-valve_limit(suppliers)..
-   sum(valve_types, num_valves_per_supplier(suppliers, valve_types)) =l= 700; 
-
-per_month_valve_purchase(valve_types)..
-  sum(suppliers, num_valves_per_supplier(suppliers, valve_types)) =l= valve_type_count (valve_types);
-
-valve_percentage_per_supplier(suppliers, valve_types)..
-  num_valves_per_supplier(suppliers ,valve_types) =e= suppliers_valve_type_percentage(suppliers, valve_types)/100  * valves_per_supplier(suppliers);
-
-cost_of_valve_purchase..
-  acquire  =e=  sum( (suppliers,valve_types),num_valves_per_supplier(suppliers, valve_types)  * cost(suppliers) );
+cost_of_valve_acquisition..
+  acquire =e= sum(suppliers, cost(suppliers) * num_valves_per_supplier(suppliers));
+count_per_valve_type(valve_types)..
+  sum(suppliers, suppliers_valve_type_percentage(suppliers, valve_types)/100 * num_valves_per_supplier(suppliers)) =g= valve_type_count(valve_types);   
 
 model hw2_1 /all/;
 solve hw2_1 using lp minimizing acquire; 
