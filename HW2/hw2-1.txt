@@ -1,0 +1,9 @@
+SOLVER STATUS     1 Normal Completion         
+MODEL STATUS      1 Optimal                   
+OBJECTIVE VALUE             6450.0000
+
+VARIABLE num_valves_per_supplier.L  number of valves purchased from each supplier
+
+1 700.000,    2 700.000,    3  50.000
+
+VARIABLE acquire.L             =     6450.000  cost of purchasing the pig valves

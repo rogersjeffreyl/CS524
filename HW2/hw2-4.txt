@@ -1,0 +1,15 @@
+SOLVER STATUS     1 Normal Completion
+MODEL STATUS      1 Optimal
+OBJECTIVE VALUE   641725.3521
+
+VARIABLE produced_quantity.L  total amount of germanium obtained in the initial stage before refiring
+
+method1 10563.380
+
+VARIABLE refired_quantity.L  germanium that is refired per grade per method
+
+          defective      grade1
+
+method1    3169.014    1373.239
+
+VARIABLE cost.L                =   641725.352  cost of germanium processing
