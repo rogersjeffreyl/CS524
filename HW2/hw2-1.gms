@@ -14,11 +14,11 @@ table suppliers_valve_type_percentage(suppliers, valve_types) "percentage of val
      3    20     20      60   ;
 free variable acquire "cost of purchasing the pig valves";
 parameters 
-   cost(suppliers)
+   cost(suppliers)  "cost of valve manufacture per supplier"
         / 1   5
           2   4
           3   3 /,
-   valve_type_count(valve_types)
+   valve_type_count(valve_types)  "count of required valve types "
       /  large  500
          medium 300
          small  300  /; 
@@ -39,3 +39,5 @@ count_per_valve_type(valve_types)..
 
 model hw2_1 /all/;
 solve hw2_1 using lp minimizing acquire; 
+display num_valves_per_supplier.l;
+display acquire.l;

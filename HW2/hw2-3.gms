@@ -1,6 +1,6 @@
 $title Weasley's Wizard Wheezes
 sets
-  advertising_type /WizardTv, Magazines, Radio/;
+  advertising_type "Method of advertising" /WizardTv, Magazines, Radio/;
 variables 
   advertising_units(advertising_type) "Advertising  units for the corresponding advertising type";
 positive variable advertising_units;
@@ -39,6 +39,9 @@ model max_audience  /number_of_people_reached, budget_limitations/;
 
 solve max_audience using lp maximizing audience_reached;
 
+display advertising_units.l;
+display audience_reached.l;
+
 equations
    wizard_week_limits "limits on the time taken to curate ad content per week";
 
@@ -49,6 +52,9 @@ wizard_week_limits..
 model max_audience_with_wizard_weeks  /number_of_people_reached, budget_limitations, wizard_week_limits/;
 
 solve max_audience_with_wizard_weeks  using lp maximizing audience_reached; 
+
+display advertising_units.l;
+display audience_reached.l;
 
 *Freeing up the fixed values to add the radio constraint
 advertising_units.lo('Radio') = 0;
@@ -61,6 +67,8 @@ number_of_people_reached_with_radio..
 model max_audience_with_wizard_weeks_radio  /number_of_people_reached_with_radio, budget_limitations,wizard_week_limits /;
 
 solve max_audience_with_wizard_weeks_radio using lp maximizing audience_reached;
+display advertising_units.l;
+display audience_reached.l;
 
 *Adding bounds on radio and magzine units
 advertising_units.up('Radio') = 120;
@@ -69,4 +77,7 @@ advertising_units.lo('Magazines') = 2;
 model max_audience_with_wizard_weeks_radio_new  /number_of_people_reached_with_radio, budget_limitations,wizard_week_limits /;
 
 solve max_audience_with_wizard_weeks_radio_new using lp maximizing audience_reached;
-display advertising_units.l     
+
+display advertising_units.l;
+display audience_reached.l;
+     
