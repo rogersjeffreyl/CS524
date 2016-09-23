@@ -1,31 +1,31 @@
 3.1
 
-SOLVER STATUS     1 Normal Completion
-MODEL STATUS      1 Optimal
-OBJECTIVE VALUE   98000000.0000
+MODEL max_audience.ModelStat   =        1.000
+MODEL max_audience.SolveStat   =        1.000
+MODEL max_audience.ObjVal      =  		9.800000E+7
+
 VARIABLE advertising_units.L  Advertising  units for the corresponding advertising type
+VARIABLE audience_reached.L    =  9.800000E+7  number of peope reached through advertising
 
 WizardTv  10.000,    Magazines 80.000
 
 
-VARIABLE audience_reached.L    =  9.800000E+7  number of peope reached through advertising
-
 3.2
-SOLVER STATUS     1 Normal Completion
-MODEL STATUS      1 Optimal
-OBJECTIVE VALUE         92000000.0000
+
+MODEL max_audience_with_wizard_weeks.ModelStat =        1.000
+MODEL max_audience_with_wizard_weeks.SolveStat =        1.000
+MODEL max_audience_with_wizard_weeks.ObjVal    =        9.200000E+7
 
 VARIABLE advertising_units.L  Advertising  units for the corresponding advertising type
-
-WizardTv  40.000,    Magazines 20.000
-
 VARIABLE audience_reached.L    =  9.200000E+7  number of peope reached through advertising
+
 
 3.3
 
-SOLVER STATUS     1 Normal Completion
-MODEL STATUS      1 Optimal
-OBJECTIVE VALUE        118000000.0000
+
+MODEL max_audience_with_wizard_weeks_radio.ModelStat =        1.000
+MODEL max_audience_with_wizard_weeks_radio.SolveStat =        1.000
+MODEL max_audience_with_wizard_weeks_radio.ObjVal 	 =  	  1.180000E+8
 
 VARIABLE advertising_units.L  Advertising  units for the corresponding advertising type
 
@@ -33,18 +33,13 @@ WizardTv  10.000,    Radio    400.000
 
 VARIABLE audience_reached.L    =  1.180000E+8  number of peope reached through advertising
 
-3.4
 
-SOLVER STATUS     1 Normal Completion
-MODEL STATUS      1 Optimal
-OBJECTIVE VALUE   100194285.7143 (can round it off to 100194286)
+3.4
+MODEL max_audience_with_wizard_weeks_radio_magazine_constraint.ModelStat =        1.000
+MODEL max_audience_with_wizard_weeks_radio_magazine_constraint.SolveStat =        1.000
+MODEL max_audience_with_wizard_weeks_radio_magazine_constraint.ObjVal =  1.001943E+8
 
 VARIABLE advertising_units.L  Advertising  units for the corresponding advertising type
-
-WizardTv   29.029 ,    Magazines  17.943,    Radio     120.000
-
+WizardTv   29.029,    Magazines  17.943,    Radio     120.000
 
 VARIABLE audience_reached.L    =  1.001943E+8  number of peope reached through advertising
-
-
-

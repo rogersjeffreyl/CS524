@@ -1,8 +1,8 @@
-SOLVER STATUS     1 Normal Completion
-MODEL STATUS      1 Optimal
-OBJECTIVE VALUE   830.0000
+MODEL school_enrollment.ModelStat =        1.000
+MODEL school_enrollment.SolveStat =        1.000
+MODEL school_enrollment.ObjVal =      830.000
 
-VARIABLE number_of_students_enrolled.L  numer of students of each type and  district enrolled in a particular school
+VARIABLE number_of_students_enrolled.L  number of students of each type and  district enrolled in a particular school
 
                      minority  non-minor~
 
@@ -11,4 +11,3 @@ District2.Whitman      50.000     250.000
 District3.Cooley       45.000      55.000
 District3.Whitman      55.000      95.000
 
-VARIABLE distance_travelled.L  =      830.000  total distance travelled by the students
