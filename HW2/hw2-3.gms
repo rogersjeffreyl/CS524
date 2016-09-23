@@ -41,6 +41,7 @@ solve max_audience using lp maximizing audience_reached;
 
 display advertising_units.l;
 display audience_reached.l;
+display max_audience.modelstat, max_audience.solvestat,max_audience.objval, advertising_units.l; 
 
 equations
    wizard_week_limits "limits on the time taken to curate ad content per week";
@@ -55,6 +56,7 @@ solve max_audience_with_wizard_weeks  using lp maximizing audience_reached;
 
 display advertising_units.l;
 display audience_reached.l;
+display max_audience_with_wizard_weeks.modelstat, max_audience_with_wizard_weeks.solvestat,max_audience_with_wizard_weeks.objval, advertising_units.l;
 
 *Freeing up the fixed values to add the radio constraint
 advertising_units.lo('Radio') = 0;
@@ -69,15 +71,17 @@ model max_audience_with_wizard_weeks_radio  /number_of_people_reached_with_radio
 solve max_audience_with_wizard_weeks_radio using lp maximizing audience_reached;
 display advertising_units.l;
 display audience_reached.l;
+display max_audience_with_wizard_weeks_radio.modelstat, max_audience_with_wizard_weeks_radio.solvestat,max_audience_with_wizard_weeks_radio.objval, advertising_units.l;
 
 *Adding bounds on radio and magzine units
 advertising_units.up('Radio') = 120;
 advertising_units.lo('Magazines') = 2;
 
-model max_audience_with_wizard_weeks_radio_new  /number_of_people_reached_with_radio, budget_limitations,wizard_week_limits /;
+model max_audience_with_wizard_weeks_radio_magazine_constraint  /number_of_people_reached_with_radio, budget_limitations,wizard_week_limits /;
 
-solve max_audience_with_wizard_weeks_radio_new using lp maximizing audience_reached;
+solve max_audience_with_wizard_weeks_radio_magazine_constraint using lp maximizing audience_reached;
 
 display advertising_units.l;
 display audience_reached.l;
+display max_audience_with_wizard_weeks_radio_magazine_constraint.modelstat, max_audience_with_wizard_weeks_radio_magazine_constraint.solvestat,max_audience_with_wizard_weeks_radio_magazine_constraint.objval, advertising_units.l;
      

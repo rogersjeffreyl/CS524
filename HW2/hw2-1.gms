@@ -37,7 +37,9 @@ cost_of_valve_acquisition..
 count_per_valve_type(valve_types)..
   sum(suppliers, suppliers_valve_type_percentage(suppliers, valve_types)/100 * num_valves_per_supplier(suppliers)) =g= valve_type_count(valve_types);   
 
-model hw2_1 /all/;
-solve hw2_1 using lp minimizing acquire; 
+model valve_production /all/;
+solve valve_production using lp minimizing acquire; 
 display num_valves_per_supplier.l;
 display acquire.l;
+
+display valve_production.modelstat, valve_production.solvestat,valve_production.objval, acquire.l;

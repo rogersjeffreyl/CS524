@@ -45,7 +45,8 @@ school_enrollment_lo(school)..
 school_enrollment_up(school)..
   sum((district, student_type),number_of_students_enrolled(district , school, student_type)) =l= 500;
   
-model hw2_2 /all/; 
-solve hw2_2 using lp minimizing distance_travelled;
+model school_enrollment /all/; 
+solve school_enrollment  using lp minimizing distance_travelled;
 display number_of_students_enrolled.l;
 display distance_travelled.l;
+display school_enrollment.modelstat,school_enrollment.solvestat,school_enrollment.objval,number_of_students_enrolled.l;

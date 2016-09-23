@@ -69,8 +69,6 @@ solve manufacturingtransistors using lp minimizing cost;
 display produced_quantity.l;
 display refired_quantity.l;
 display cost.l;
-
- 
+display manufacturingtransistors.modelstat,manufacturingtransistors.solvestat,manufacturingtransistors.objval,produced_quantity.l,refired_quantity.l;
   
-
 
