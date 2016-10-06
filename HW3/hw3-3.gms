@@ -96,3 +96,9 @@ b(I) = uniform(-100,100) ;
 model abs_value_3 /positive_differences_eq,negative_differences_eq,sum_of_differences/;
 solve abs_value_3 using lp minimizing ztotdev;
 
+*3.4
+model abs_value_4 /positive_differences_eq,negative_differences_eq,min_max_difference/
+solve abs_value_4 using lp minimizing zminmax;
+parameters MinMaxDevBig;
+MinMaxDevBig = zminmax.L;
+display MinMaxDevBig;
