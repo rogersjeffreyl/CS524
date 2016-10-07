@@ -1,7 +1,7 @@
 
 sets
-  reservoirs /A,B/,
-  months     /March, April/;
+  reservoirs "set denoting the reservoirs"  /A,B/,
+  months   "set denoting months for which reservoirs are used"  /March, April/ ;
 
 parameters
    minimum_allowable_level(reservoirs) "minimum allowable level for reservoirs"
@@ -28,28 +28,28 @@ table
        B  	130        15  ;
 
 scalars
-  power_cost_1 /5.00/,
-  power_cost_2 /3.50/;
+  power_cost_1 "selling price of power for <50k KW" /5.00/,
+  power_cost_2 "selling price of power for >50k KW"/3.50/;
 
 positive variables
-  inflow(reservoirs,months),
-  outflow(reservoirs,months),
-  spill(reservoirs,months),
-  reservoir_level(reservoirs,months),
-  power_lt_50k(months),
-  power_gt_50k(months);
+  inflow(reservoirs,months) "inflow to the reservoirs per month",
+  outflow(reservoirs,months) "outflow from the reservoirs per month",
+  spill(reservoirs,months) " spill per reservoir",
+  reservoir_level(reservoirs,months) "reservoir level per reservoir per month",
+  power_lt_50k(months) "amount of power generated lesser than 50K KW",
+  power_gt_50k(months) "amount of power generated greater than 50K KW";
 
 
 free variable revenue "revenue due to power generation";
 equations
-  reservoir_a_capacity_lt(months),
-  reservoir_a_capacity_gt(months),
-  reservoir_b_capacity_lt(months),
-  reservoir_b_capacity_gt(months),
-  capacity_constraints(reservoirs,months),
-  total_power(months),
-  power_constraints(months),
-  revenue_eqn;
+  reservoir_a_capacity_lt(months) " max capacity constraint for the reservoir a",
+  reservoir_a_capacity_gt(months) "min capacity constratint for the reservoir a",
+  reservoir_b_capacity_lt(months) "max capacity constraint for reservoir b",
+  reservoir_b_capacity_gt(months) "min capacity constraint for reservoir b",
+  capacity_constraints(reservoirs,months) "capacity constraints for the amount of power that can be generated",
+  total_power(months) "equating the total power generated to power_lt_50k(months)+  power_gt_50k(months)",
+  power_constraints(months) "constrating on the power_lt_50k variable to bound it by 50k",
+  revenue_eqn "Revenue equation ";
 
   
 reservoir_a_capacity_lt(months)..

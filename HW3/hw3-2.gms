@@ -41,17 +41,17 @@ equations
    no_production_in_t_1(i,t) "no items should be produced in t+1";
 
 profit_equation..
-   profit =e= sum((i,t), y(i,t) * p(i,t) - x(i,t) * c(i) - inv(i,t) * q(i) - normal_marketing_hrs(t) * d(t) - overtime_marketing_hrs(t) * capD(t) );
+   profit =e= sum((i,t), y(i,t) * p(i,t) - x(i,t) * c(i) - inv(i,t) * q(i)) - sum(t, normal_marketing_hrs(t) * d(t) + overtime_marketing_hrs(t) * capD(t) );
 
 processing_time(j,s)..
    sum(i, h(i,j)*x(i,s) ) =l= capH(j,s);
 
 *What about values for I0
 inventory_eq(i,t)..
-  inv(i,t) =e=  x(i,t)-y(i,t)+inv(i,t-1) - disp(i,t); 
+  inv(i,t) =e=  x(i,t-1)-y(i,t)+inv(i,t-1) - disp(i,t); 
 
 quantity_sold_disposed(i,t)..
-   y(i,t) + disp(i,t) =l= inv(i, t-1);
+   y(i,t) + disp(i,t) =l= inv(i, t-1)+x(i,t-1);
 
 inventory_at_t_1(i,t)..
   inv(i, t )$(ord(t) =card(t))  =e= 0;
