@@ -1,18 +1,18 @@
 $title "Least Squares"
 sets
-ALLI /c1*c400/
-ALLJ /x1*x100/
+ALLI "Sets for Equations" /c1*c400/ 
+ALLJ "Sets for Variables" /x1*x100/ 
 ;
 sets
-I(ALLI) /c1*c6/
+I(ALLI) /c1*c6/ 
 J(ALLJ) /x1*x4/
 ;
 
 variables 
-	differences(ALLI),
-	x(ALLJ);
+	differences(ALLI) "Variables for the differences for each equation",
+	x(ALLJ) "Variables in the equation";
 
-free variable ztotdev;	
+free variable ztotdev "Free variable corresponding to the total deviation";	
 
 parameters
 b(ALLI)     "constant",
@@ -38,9 +38,9 @@ Table A (ALLI, ALLJ) "coefficients for the equation"
 
 equations  
 
-	positive_differences_eq(ALLI) ,
-	negative_differences_eq(ALLI) ,
-	sum_of_differences;
+	positive_differences_eq(ALLI) "positive differences equation to model the absolute value",
+	negative_differences_eq(ALLI) "negative differences to model the absolute value",
+	sum_of_differences "objective corresponding to the sum of the differences";
 
 positive_differences_eq(I)..
  	sum(J,A(I, J)*x(J)) -b(I) =l= differences(I);
