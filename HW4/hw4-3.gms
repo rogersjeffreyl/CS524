@@ -18,7 +18,7 @@ alias(broom_shops,I,J);
 set nearest_node(broom_shops, J); 
 
 parameters
-   xcord(broom_shops) x-coordinates
+   xcord(broom_shops) "x-coordinates of shop"
    / Hogwarts                   0
      "Godric's Hollow"          20
      "Little Whinging"          18
@@ -30,7 +30,7 @@ parameters
      "Little Hangleton"         11
      "Weasley's Wizard Wheezes" 2   /
 
-   ycord(broom_shops) y-coordinates
+   ycord(broom_shops) "y-coordinates of shop"
    / Hogwarts                   0
      "Godric's Hollow"          20
      "Little Whinging"          10
@@ -42,7 +42,7 @@ parameters
      "Little Hangleton"         0
      "Weasley's Wizard Wheezes" 15   /
 
-   brooms_needed(broom_shops) brooms needed by each shop
+   brooms_needed(broom_shops) "brooms needed by each shop"
    / Hogwarts                   10
      "Godric's Hollow"          6
      "Little Whinging"          8
@@ -54,7 +54,7 @@ parameters
      "Little Hangleton"         9
      "Weasley's Wizard Wheezes" 12   /
 
-   available_brooms(broom_shops) brooms currently available
+   available_brooms(broom_shops) "brooms currently available"
    / Hogwarts                   8
      "Godric's Hollow"          13
      "Little Whinging"          4
@@ -70,8 +70,8 @@ parameters
 scalar broom_transport_cost "broom transport cost Galleons/Km" /0.5/;
 
 parameter 
-  pairwise_distance(broom_shops,J) , 
-  minimum_pairwise_distance(I);
+  pairwise_distance(broom_shops,J) "parameter to hold the pairwise distances" , 
+  minimum_pairwise_distance(I) "parameter to store the minimum distance";
 
 *Finding the pairwise distances between all shops  
 pairwise_distance(broom_shops,J) = sqrt( (xcord(broom_shops) - xcord(J))*(xcord(broom_shops) - xcord(J)) + (ycord(broom_shops) - ycord(J))*(ycord(broom_shops) - ycord(J)));
@@ -83,14 +83,14 @@ shops_with_demand(broom_shops)=yes$(available_brooms(broom_shops)-brooms_needed(
 minimum_pairwise_distance(I) = smin(J$(ord(J) ne ord(I)),pairwise_distance(I,J));
 
 
-free variable cost;
+free variable cost "objective variable";
 
 positive Variable
-  z(I,J);
-variable closest(i) ;
+  z(I,J) "brooms shipped from shop I to shop J";
+
 equations
-   flow_balance(broom_shops),
-   objective_eq;
+   flow_balance(broom_shops) "Balance of Flow",
+   objective_eq "Objecive to minimize the shipping cost while satisfying the demands";
    
                                                                  
 objective_eq.. 
@@ -99,7 +99,7 @@ objective_eq..
 flow_balance(broom_shops).. 
     sum(J, z(J,broom_shops)) + available_brooms(broom_shops) =e= brooms_needed(broom_shops) + sum(J, z(broom_shops,J)) ;
 
-Model broom_rental /all/ ;
+model broom_rental /all/ ;
 $onecho >cplex.opt
 lpmethod 3
 netfind 1
@@ -111,7 +111,8 @@ solve broom_rental using lp minimizing cost;
 * Finding node which has not received supply from any of the nearest nodes
 nearest_node(shops_with_demand, J) = yes$(pairwise_distance(shops_with_demand,J)=minimum_pairwise_distance(shops_with_demand) and (z.l(J,shops_with_demand) =0 ));
 
-parameter nearest_neighbor(broom_shops,J) ;
+parameter 
+  nearest_neighbor(broom_shops,J) ;
 nearest_neighbor(nearest_node)=1;
 
 not_from_closest(shops_with_demand) = yes$(sum(j, nearest_neighbor(shops_with_demand,J) )=1 )
