@@ -4,7 +4,7 @@ set united(cities) /MSN, ORD, SFO, IAH, DCA, MCO/;
 set delta(cities) /MSN, MSP, DTW, SFO, IAH, DCA, MCO/;
 set destinations(cities) /SFO, IAH, DCA, MCO/;
 set hubs(cities) /ORD, MSP, DTW/;
-
+set airlines /Delta, United/
 alias(cities, I, J);
 parameters 
 
@@ -160,5 +160,10 @@ x.up('MSN', 'MSP') = +Inf;
 
 solve which_airline using lp minimizing travel_time;
 display x.l;
-
+set hub_destination_reachability(hubs,destinations);
+hub_destination_reachability(hubs, destinations)=yes$(x.l(hubs,destinations)>0);
+set  airlines_destination_reachability(destinations, airlines);
+airlines_destination_reachability(destinations,'United')=yes$(hub_destination_reachability('ORD',destinations)); 
+airlines_destination_reachability(destinations,'Delta')=yes$(hub_destination_reachability('MSP',destinations) or hub_destination_reachability('DTW',destinations));
+display airlines_destination_reachability;
 
