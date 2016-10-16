@@ -1,14 +1,14 @@
 $Title Malfoy Catering 
-set T /1*10/;
-parameter d(T) / 1 50, 2 60, 3 80, 4 70, 5 50, 6 60, 7 90, 8 80, 9 50,10 100 / ;
+set T "Days" /1*10/ ;
+parameter d(T) "Demand for days" / 1 50, 2 60, 3 80, 4 70, 5 50, 6 60, 7 90, 8 80, 9 50,10 100 /  ;
 
 scalar
-	cost_of_buying_napkins 'cost of buying napkins'/200/,
+	cost_of_buying_napkins 'cost of buying napkins' /200/,
 	cost_of_2_day_laundry 'cost of two day laundry' /75/,
 	cost_of_4_day_laundry 'cost of four day laundry' /25/;
 
-set Nodes            /Day1*Day10,I1*I10,supply_through_buying,surplus_at_end/;
-set Days(Nodes)      /Day1*Day10/;
+set Nodes  /Day1*Day10, I1*I10, supply_through_buying, surplus_at_end/;
+set Days(Nodes) /Day1*Day10/;
 set Surplus(Nodes) /I1*I10/;
 set Arcs(Nodes,Nodes) ;
 
@@ -38,18 +38,18 @@ free variable min_cost;
 positive variable x(i,j);
 
 equations  
-	minimum_cost_eq,
-	enforce_surplus_supply_eq_of_flow_eq(I), 
-	enforce_surplus_supply_eq(Days) ;
+	minimum_cost_eq "objective equation for minimum costs of the napkins",
+	enforce_surplus_supply_eq_of_flow_eq(I) "balance of flow", 
+	enforce_surplus_supply_eq(Days) "enforcing that surplus should be equal to the demand for the day" ;
 
 minimum_cost_eq.. 
-sum(arcs,c(arcs)*x(arcs)) =e= min_cost;
+	sum(arcs,c(arcs)*x(arcs)) =e= min_cost;
 
 enforce_surplus_supply_eq_of_flow_eq(I)..  
-sum(J$(Arcs(I,J)), x(I,J)) -  sum(J$(Arcs(J,I)), x(J,I)) =E= 0 ;
+	sum(J$(Arcs(I,J)), x(I,J)) -  sum(J$(Arcs(J,I)), x(J,I)) =E= 0 ;
 
 enforce_surplus_supply_eq(Days) ..
-sum(Surplus$(Ord(Days)=Ord(Surplus)),X(Days,Surplus)) =e= sum(T$(Ord(T)=Ord(Days)),D(T));
+	sum(Surplus$(Ord(Days)=ord(Surplus)),X(Days,Surplus)) =e= sum(T$(ord(T)=ord(Days)),D(T));
 
 model malfoy_catering /all/;
 $onecho >cplex.opt
@@ -60,6 +60,12 @@ $offecho
 malfoy_catering.optfile =1;
 solve malfoy_catering using lp minimizing min_cost ;
 
-display x.l;
+parameter Cost;
+Cost =  min_cost.L;
+display Cost;
+
+parameter 	NumBought;
+NumBought = sum (Days, x.l('supply_through_buying',  Days));
+display NumBought;
 
 display malfoy_catering.numequ ;
