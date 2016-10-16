@@ -11,6 +11,11 @@ set Nodes  /Day1*Day10, I1*I10, supply_through_buying, surplus_at_end/;
 set Days(Nodes) /Day1*Day10/;
 set Surplus(Nodes) /I1*I10/;
 set Arcs(Nodes,Nodes) ;
+parameter Demands(Nodes);
+
+Demands(Days) = - sum(T$(ord(T)=ord(Days)),D(T));
+Demands(Surplus) = sum(T$(ord(T)=ord(Surplus)),D(T));
+display demands;
 
 alias(Nodes,I,J,K);
 alias(Days, D1);
@@ -39,18 +44,17 @@ positive variable x(i,j);
 
 equations  
 	minimum_cost_eq "objective equation for minimum costs of the napkins",
-	enforce_surplus_supply_eq_of_flow_eq(I) "balance of flow", 
-	enforce_surplus_supply_eq(Days) "enforcing that surplus should be equal to the demand for the day" ;
+	enforce_surplus_supply_eq_of_flow_eq(I) "balance of flow";
 
 minimum_cost_eq.. 
 	sum(arcs,c(arcs)*x(arcs)) =e= min_cost;
 
 enforce_surplus_supply_eq_of_flow_eq(I)..  
-	sum(J$(Arcs(I,J)), x(I,J)) -  sum(J$(Arcs(J,I)), x(J,I)) =E= 0 ;
+	sum(J$(Arcs(I,J)), x(I,J)) -  sum(J$(Arcs(J,I)), x(J,I)) =E=Demands(I) ;
 
-enforce_surplus_supply_eq(Days) ..
-	sum(Surplus$(Ord(Days)=ord(Surplus)),X(Days,Surplus)) =e= sum(T$(ord(T)=ord(Days)),D(T));
 
+	
+* display X.UP;
 model malfoy_catering /all/;
 $onecho >cplex.opt
 lpmethod 3
@@ -63,7 +67,6 @@ solve malfoy_catering using lp minimizing min_cost ;
 parameter Cost;
 Cost =  min_cost.L;
 display Cost;
-
 parameter 	NumBought;
 NumBought = sum (Days, x.l('supply_through_buying',  Days));
 display NumBought;
