@@ -71,4 +71,7 @@ parameter 	NumBought;
 NumBought = sum (Days, x.l('supply_through_buying',  Days));
 display NumBought;
 
-display malfoy_catering.numequ ;
+parameter NumEqu;
+NumEqu =  malfoy_catering.numequ ;
+
+display NumEqu;
