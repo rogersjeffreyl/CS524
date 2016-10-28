@@ -1,0 +1,113 @@
+$title Critical Path Method
+set nodes /A*H/;
+alias (nodes,I,J,K,L);
+set activities(I,J) 
+/
+  A.(B,D)
+  D.(F,E)
+  B.(D,E,C)
+  C.(E,G)
+  E.(F,H,G)
+  F.H
+  G.H
+ /;
+parameter duration(I,J)
+  /A.B 4
+   A.D 3
+   B.C 5
+   B.D 5
+   B.E 8
+   C.E 6
+   C.G 4
+   D.E 7
+   D.F 9   
+   E.F 10
+   E.G 7
+   E.H 3
+   F.H 3 
+   G.H 5
+   /;
+
+parameter min_start(I,J)
+  /A.B 3
+   A.D 2
+   B.C 2
+   B.D 4
+   B.E 6
+   C.E 5
+   C.G 2
+   D.E 5
+   D.F 8   
+   E.F 6
+   E.G 4
+   E.H 2   
+   F.H 2
+   G.H 4 /;   
+
+set precedence(I,J,K,L)
+/
+  (A.B).(B.D, B.E, B.C)
+  (A.D).(D.E, D.F)
+  (B.C).(C.E, C.G)
+  (B.D).(D.E,D.F)
+  (B.E).(E.F,E.H,E.G)
+  (D.E).(E.F,E.H,E.G)
+  (C.E).(E.F,E.H,E.G)
+  (C.G).(G.H)
+  (E.F).(F.H)  
+  (E.G).(G.H) 
+/;
+
+variables time_duration;
+positive variable t(I,J) "time activity starts";
+equations 
+  incidence(I,J,K,L), 
+  end_time(I,J);
+incidence(I,J,K,L)$precedence(I,J,K,L)..
+    t(K,L) =g= t(I,J) + duration(I,J);
+end_time(I,J)..
+    time_duration =g= t(I,J) + duration(I,J);
+
+model critical_path_method /incidence, end_time/;
+solve critical_path_method using lp minimizing time_duration;
+
+set critical(I,J) "critical activities";
+critical(I,J)=yes$( smax((K,L)$precedence(K,L,I,J), incidence.m(K,L,I,J)) ge 1
+              or smax((K,L)$precedence(I,J,K,L), incidence.m(I,J,K,L)) ge 1 );
+display critical;	
+
+*2.2  
+
+free variable cost; 
+positive variables x(I,J) ;  
+equation
+  cost_eq,
+  incidence_eq,
+  end_time_eq;
+time_duration.fx=25;
+cost_eq..
+    cost =e= sum((I,J)$activities(I,J),3+2*(duration(I,J)-x(I,J) )/(duration(I,J)-min_start(I,J)));
+incidence_eq(I,J,K,L)$precedence(I,J,K,L)..
+    t(K,L) =g= t(I,J) + x(I,J) ;
+end_time_eq(I,J)..
+    time_duration =g= t(I,J) + x(I,J);
+x.up(I,J)=duration(I,J);
+x.lo(I,J)=min_start(I,J);
+model critical_path_cost /incidence_eq, end_time_eq,cost_eq/;
+solve  critical_path_cost using lp minimizing cost;
+set critical_25(I,J) "critical activities";
+critical_25(I,J)=yes$( smax((K,L)$precedence(K,L,I,J), incidence_eq.m(K,L,I,J)) ge 1
+              or smax((K,L)$precedence(I,J,K,L), incidence_eq.m(I,J,K,L)) ge 1 );
+display critical_25; 
+display cost.L;
+display t.L;
+
+
+time_duration.fx=20;
+set critical_20(I,J) "critical activities";
+solve  critical_path_cost using lp minimizing cost;
+critical_20(I,J)=yes$( smax((K,L)$precedence(K,L,I,J), incidence_eq.m(K,L,I,J)) ge 1
+              or smax((K,L)$precedence(I,J,K,L), incidence_eq.m(I,J,K,L)) ge 1 );
+display critical_20; 
+display cost.L;
+display t.L;
