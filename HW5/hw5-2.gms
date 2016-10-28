@@ -11,7 +11,7 @@ set activities(I,J)
   F.H
   G.H
  /;
-parameter duration(I,J)
+parameter duration(I,J) "duration for each of the events. Used as an upper bound of the time later"
   /A.B 4
    A.D 3
    B.C 5
@@ -28,7 +28,7 @@ parameter duration(I,J)
    G.H 5
    /;
 
-parameter min_start(I,J)
+parameter min_start(I,J) "Minimum required starting time for each of the activities"
   /A.B 3
    A.D 2
    B.C 2
@@ -58,11 +58,11 @@ set precedence(I,J,K,L)
   (E.G).(G.H) 
 /;
 
-variables time_duration;
+variables time_duration "Total duration for the whole set of activities to be done";
 positive variable t(I,J) "time activity starts";
 equations 
-  incidence(I,J,K,L), 
-  end_time(I,J);
+  incidence(I,J,K,L) "order of the activities", 
+  end_time(I,J) "end time of the activities for mini max";
 incidence(I,J,K,L)$precedence(I,J,K,L)..
     t(K,L) =g= t(I,J) + duration(I,J);
 end_time(I,J)..
@@ -75,15 +75,17 @@ set critical(I,J) "critical activities";
 critical(I,J)=yes$( smax((K,L)$precedence(K,L,I,J), incidence.m(K,L,I,J)) ge 1
               or smax((K,L)$precedence(I,J,K,L), incidence.m(I,J,K,L)) ge 1 );
 display critical;	
+display t.L;
 
 *2.2  
 
 free variable cost; 
 positive variables x(I,J) ;  
-equation
-  cost_eq,
-  incidence_eq,
-  end_time_eq;
+equation 
+  cost_eq "cost for the activties based on the time taken",
+  incidence_eq "order of the activities",
+  end_time_eq "end time of the activities";
+* Fixing the time duration  
 time_duration.fx=25;
 cost_eq..
     cost =e= sum((I,J)$activities(I,J),3+2*(duration(I,J)-x(I,J) )/(duration(I,J)-min_start(I,J)));

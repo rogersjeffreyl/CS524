@@ -1,6 +1,6 @@
 $title Generation capacity
-set year /1*5/;
-set plant /p1*p4/;
+set year "years of power demand" /1*5/ ;
+set plant "power plants" /p1*p4/ ;
 parameter reqCap(year) "in million Kwh" /
            1 80
 		   2 100
@@ -20,8 +20,8 @@ table data(plant,dfields)
    p4      40      14      0.6 ;
 
 binary variables 
-    z(plant,year),
-    const(plant);
+    z(plant,year) "indicating if a pant is operational in a particular year",
+    const(plant) "indicator for construction costs";
 
 free variable total_cost;
 equations
