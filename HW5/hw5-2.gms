@@ -103,30 +103,7 @@ critical_25(I,J)=yes$( smax((K,L)$precedence(K,L,I,J), incidence_eq.m(K,L,I,J)) 
 display critical_25; 
 display cost.L;
 display t.L;
-$ontext
-parameter
-    eeTime(I,J) "early event time",
-    leTime(I,J) "late event time";
 
-time_duration.fx = projDur.l;
-
-variables objective;
-equations timeopt;
-
-timeopt..
-    objective =e= sum(activities,t(activity));
-
-model eventtimes /timeopt,incidence,endTime/;
-
-solve eventtimes using lp maximizing objective;
-leTime(activity) = t.l(activity);
-solve eventtimes using lp minimizing objective;
-eeTime(activity) = t.l(activity);
-
-critical(activity) = yes$(eeTime(activity) ge leTime(activity));
-
-display eeTime,leTime,critical;
-$offtext
 
 parameter
     eeTime(I,J) "early event time",
