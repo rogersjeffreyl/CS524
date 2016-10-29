@@ -103,13 +103,95 @@ critical_25(I,J)=yes$( smax((K,L)$precedence(K,L,I,J), incidence_eq.m(K,L,I,J)) 
 display critical_25; 
 display cost.L;
 display t.L;
+$ontext
+parameter
+    eeTime(I,J) "early event time",
+    leTime(I,J) "late event time";
 
+time_duration.fx = projDur.l;
+
+variables objective;
+equations timeopt;
+
+timeopt..
+    objective =e= sum(activities,t(activity));
+
+model eventtimes /timeopt,incidence,endTime/;
+
+solve eventtimes using lp maximizing objective;
+leTime(activity) = t.l(activity);
+solve eventtimes using lp minimizing objective;
+eeTime(activity) = t.l(activity);
+
+critical(activity) = yes$(eeTime(activity) ge leTime(activity));
+
+display eeTime,leTime,critical;
+$offtext
+
+parameter
+    eeTime(I,J) "early event time",
+    leTime(I,J) "late event time";   
+set firstdone(I,J), next(I,J);
+set iters /iter1*iter100/;
+set lastdone(I,J), prev(I,J);
+
+eeTime(I,J) = -inf;
+firstdone(K,L) = yes$(sum((I,J)$precedence(I,J,K,L),1) eq 0);
+eeTime(firstdone) = 0;
+loop(iters$(card(firstdone) gt 0),
+  next(I,J) = yes$sum(precedence(firstdone,I,J),1);
+  eeTime(next) = smax(precedence(I,J,next), eeTime(I,J)+x.L(I,J));
+  firstdone(activities) = next(activities);
+);
+leTime(I,J) = inf;
+lastdone(I,J) = yes$(sum((K,L)$(precedence(I,J,K,L)),1) eq 0);
+leTime(lastdone) = time_duration.l-x.l(lastdone);
+loop(iters$(card(lastdone) gt 0),
+  prev(I,J) = yes$sum(precedence(I,J,lastdone),1);
+  leTime(prev) = smin(precedence(prev,I,J), leTime(I,J)-x.L(prev));
+  lastdone(activities) = prev(activities);
+);
+
+critical_25(I,J) = yes$(eeTime(I,J) ge leTime(I,J));
+
+display eeTime,leTime,critical_25;
+
+parameter time_critical_25(I,J);
+time_critical_25(I,J) = t.L(I,J)$(critical_25(I,J));
+display time_critical_25;
+
+*fx=20
 
 time_duration.fx=20;
 set critical_20(I,J) "critical activities";
 solve  critical_path_cost using lp minimizing cost;
 critical_20(I,J)=yes$( smax((K,L)$precedence(K,L,I,J), incidence_eq.m(K,L,I,J)) ge 1
               or smax((K,L)$precedence(I,J,K,L), incidence_eq.m(I,J,K,L)) ge 1 );
+
+eeTime(I,J) = -inf;
+firstdone(K,L) = yes$(sum((I,J)$precedence(I,J,K,L),1) eq 0);
+eeTime(firstdone) = 0;
+loop(iters$(card(firstdone) gt 0),
+  next(I,J) = yes$sum(precedence(firstdone,I,J),1);
+  eeTime(next) = smax(precedence(I,J,next), eeTime(I,J)+x.L(I,J));
+  firstdone(activities) = next(activities);
+);
+leTime(I,J) = inf;
+lastdone(I,J) = yes$(sum((K,L)$(precedence(I,J,K,L)),1) eq 0);
+leTime(lastdone) = time_duration.l-x.l(lastdone);
+loop(iters$(card(lastdone) gt 0),
+  prev(I,J) = yes$sum(precedence(I,J,lastdone),1);
+  leTime(prev) = smin(precedence(prev,I,J), leTime(I,J)-x.L(prev));
+  lastdone(activities) = prev(activities);
+);
+
+critical_20(I,J) = yes$(eeTime(I,J) ge leTime(I,J));
+
 display critical_20; 
 display cost.L;
 display t.L;
+
+
+parameter time_critical_20(I,J);
+time_critical_20(I,J) = t.L(I,J)$(critical_20(I,J));
+display time_critical_20;
