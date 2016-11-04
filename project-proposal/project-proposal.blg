@@ -1,0 +1,52 @@
+This is BibTeX, Version 0.99d (TeX Live 2016)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: project-proposal.aux
+The style file: SIGCHI-Reference-Format.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: sample.bib
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--no number and no volume in o2007star
+Warning--page numbers missing in both pages and numpages fields in o2007star
+You've used 1 entry,
+            5283 wiz_defined-function locations,
+            1222 strings with 14220 characters,
+and the built_in function-call counts, 917 in all, are:
+= -- 143
+> -- 30
+< -- 0
++ -- 11
+- -- 9
+* -- 53
+:= -- 89
+add.period$ -- 5
+call.type$ -- 1
+change.case$ -- 7
+chr.to.int$ -- 1
+cite$ -- 3
+duplicate$ -- 61
+empty$ -- 46
+format.name$ -- 12
+if$ -- 235
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 4
+newline$ -- 41
+num.names$ -- 6
+pop$ -- 30
+preamble$ -- 1
+purify$ -- 11
+quote$ -- 0
+skip$ -- 14
+stack$ -- 0
+substring$ -- 42
+swap$ -- 2
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 9
+warning$ -- 2
+while$ -- 3
+width$ -- 0
+write$ -- 45
+(There were 2 warnings)
