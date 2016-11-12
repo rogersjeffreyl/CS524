@@ -1,0 +1,394 @@
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/11/16 23:21:34 Page 1
+Lights Out
+C o m p i l a t i o n
+
+
+   2   
+   3  set cell_dim /1*5/;
+   4   
+   5  alias (cell_dim,i,j);
+   6  binary variable light_status(i,j) "light status = 0 implies light is off";
+   7  binary variable switch_clicked(i,j) "";
+   8  light_status.L(i,j)=1;
+   9   
+  10  positive variable y(i,j);
+  11  y.up(i,j)=2;
+  12  y.lo(i,j)=0;
+  13  free variable num_turns;
+  14  equations
+  15          objective_eq,
+  16          all_lights_turned_off,
+  17      light_state_toggle_eqn(i,j);
+  18   
+  19  * Switch can be clicked only once
+  20  *switch_clicked_count.up(i,j)=1;
+  21  *switch_clicked_count.LO(i,j)=0;
+  22  all_lights_turned_off..
+  23  sum((i,j),light_status(i,j)) =e=0;
+  24  objective_eq..
+  25          num_turns =e= sum((i,j),switch_clicked(i,j));
+  26   
+  27  light_state_toggle_eqn(i,j)..
+  28          switch_clicked(i-1,j)+switch_clicked(i,j-1)+switch_clicked(i,j)+switch_clicked(i,j+1)+switch_clicked(i+1,j) =e= 2*y(i,j)+1-light_status(i,j)
+  29   
+  30  model lights_out /light_state_toggle_eqn , all_lights_turned_off, objective_eq/;
+  31   
+  32  solve lights_out using mip minimizing num_turns;
+  33   
+  34   
+  35  display light_status.L;
+  36   
+  37   
+  38   
+  39   
+  40   
+  41   
+  42   
+
+
+COMPILATION TIME     =        0.001 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/11/16 23:21:34 Page 2
+Lights Out
+Equation Listing    SOLVE lights_out Using MIP From line 32
+
+
+---- light_state_toggle_eqn  =E=  
+
+light_state_toggle_eqn(1,1)..  light_status(1,1) + switch_clicked(1,1) + switch_clicked(1,2) + switch_clicked(2,1) - 2*y(1,1) =E= 1 ; (LHS = 1)
+     
+light_state_toggle_eqn(1,2)..  light_status(1,2) + switch_clicked(1,1) + switch_clicked(1,2) + switch_clicked(1,3) + switch_clicked(2,2) - 2*y(1,2) =E= 1 ; (LHS = 1)
+     
+light_state_toggle_eqn(1,3)..  light_status(1,3) + switch_clicked(1,2) + switch_clicked(1,3) + switch_clicked(1,4) + switch_clicked(2,3) - 2*y(1,3) =E= 1 ; (LHS = 1)
+     
+REMAINING 22 ENTRIES SKIPPED
+
+
+---- all_lights_turned_off  =E=  
+
+all_lights_turned_off..  light_status(1,1) + light_status(1,2) + light_status(1,3) + light_status(1,4) + light_status(1,5) + light_status(2,1) + light_status(2,2) + light_status(2,3) + light_status(2,4) + light_status(2,5) + light_status(3,1)
+     
+      + light_status(3,2) + light_status(3,3) + light_status(3,4) + light_status(3,5) + light_status(4,1) + light_status(4,2) + light_status(4,3) + light_status(4,4) + light_status(4,5) + light_status(5,1) + light_status(5,2) + light_status(5,3)
+     
+      + light_status(5,4) + light_status(5,5) =E= 0 ; (LHS = 25, INFES = 25 ****)
+     
+
+---- objective_eq  =E=  
+
+objective_eq..  - switch_clicked(1,1) - switch_clicked(1,2) - switch_clicked(1,3) - switch_clicked(1,4) - switch_clicked(1,5) - switch_clicked(2,1) - switch_clicked(2,2) - switch_clicked(2,3) - switch_clicked(2,4) - switch_clicked(2,5)
+     
+      - switch_clicked(3,1) - switch_clicked(3,2) - switch_clicked(3,3) - switch_clicked(3,4) - switch_clicked(3,5) - switch_clicked(4,1) - switch_clicked(4,2) - switch_clicked(4,3) - switch_clicked(4,4) - switch_clicked(4,5) - switch_clicked(5,1)
+     
+      - switch_clicked(5,2) - switch_clicked(5,3) - switch_clicked(5,4) - switch_clicked(5,5) + num_turns =E= 0 ; (LHS = 0)
+     
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/11/16 23:21:34 Page 3
+Lights Out
+Column Listing      SOLVE lights_out Using MIP From line 32
+
+
+---- light_status  light status = 0 implies light is off
+
+light_status(1,1)
+                (.LO, .L, .UP, .M = 0, 1, 1, 0)
+        1       light_state_toggle_eqn(1,1)
+        1       all_lights_turned_off
+
+light_status(1,2)
+                (.LO, .L, .UP, .M = 0, 1, 1, 0)
+        1       light_state_toggle_eqn(1,2)
+        1       all_lights_turned_off
+
+light_status(1,3)
+                (.LO, .L, .UP, .M = 0, 1, 1, 0)
+        1       light_state_toggle_eqn(1,3)
+        1       all_lights_turned_off
+
+REMAINING 22 ENTRIES SKIPPED
+
+---- switch_clicked  
+
+switch_clicked(1,1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+        1       light_state_toggle_eqn(1,1)
+        1       light_state_toggle_eqn(1,2)
+        1       light_state_toggle_eqn(2,1)
+       -1       objective_eq
+
+switch_clicked(1,2)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+        1       light_state_toggle_eqn(1,1)
+        1       light_state_toggle_eqn(1,2)
+        1       light_state_toggle_eqn(1,3)
+        1       light_state_toggle_eqn(2,2)
+       -1       objective_eq
+
+switch_clicked(1,3)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+        1       light_state_toggle_eqn(1,2)
+        1       light_state_toggle_eqn(1,3)
+        1       light_state_toggle_eqn(1,4)
+        1       light_state_toggle_eqn(2,3)
+       -1       objective_eq
+
+REMAINING 22 ENTRIES SKIPPED
+
+---- y  
+
+y(1,1)
+                (.LO, .L, .UP, .M = 0, 0, 2, 0)
+       -2       light_state_toggle_eqn(1,1)
+
+y(1,2)
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/11/16 23:21:34 Page 4
+Lights Out
+Column Listing      SOLVE lights_out Using MIP From line 32
+
+
+     y  
+
+                (.LO, .L, .UP, .M = 0, 0, 2, 0)
+       -2       light_state_toggle_eqn(1,2)
+
+y(1,3)
+                (.LO, .L, .UP, .M = 0, 0, 2, 0)
+       -2       light_state_toggle_eqn(1,3)
+
+REMAINING 22 ENTRIES SKIPPED
+
+---- num_turns  
+
+num_turns
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       objective_eq
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/11/16 23:21:34 Page 5
+Lights Out
+Model Statistics    SOLVE lights_out Using MIP From line 32
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           3     SINGLE EQUATIONS           27
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES           76
+NON ZERO ELEMENTS           206     DISCRETE VARIABLES         50
+
+
+GENERATION TIME      =        0.006 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+
+
+EXECUTION TIME       =        0.006 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/11/16 23:21:34 Page 6
+Lights Out
+Solution Report     SOLVE lights_out Using MIP From line 32
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   lights_out          OBJECTIVE  num_turns
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  32
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                7.0000
+
+ RESOURCE USAGE, LIMIT          0.015      1000.000
+ ITERATION COUNT, LIMIT        54    2000000000
+
+IBM ILOG CPLEX   24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
+Cplex 12.6.3.0
+
+Space for names approximately 0.00 Mb
+Use option 'names no' to turn use of names off
+MIP status(101): integer optimal solution
+Cplex Time: 0.01sec (det. 1.65 ticks)
+Fixing integer variables, and solving final LP...
+Fixed MIP status(1): optimal
+Cplex Time: 0.00sec (det. 0.03 ticks)
+Proven optimal solution.
+
+MIP Solution:            7.000000    (54 iterations, 0 nodes)
+Final Solve:             7.000000    (0 iterations)
+
+Best possible:           7.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+---- EQU light_state_toggle_eqn  
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+1.1         1.0000         1.0000         1.0000         EPS         
+1.2         1.0000         1.0000         1.0000         EPS         
+1.3         1.0000         1.0000         1.0000         EPS         
+1.4         1.0000         1.0000         1.0000         EPS         
+1.5         1.0000         1.0000         1.0000         EPS         
+2.1         1.0000         1.0000         1.0000         EPS         
+2.2         1.0000         1.0000         1.0000         EPS         
+2.3         1.0000         1.0000         1.0000         EPS         
+2.4         1.0000         1.0000         1.0000         EPS         
+2.5         1.0000         1.0000         1.0000         EPS         
+3.1         1.0000         1.0000         1.0000         EPS         
+3.2         1.0000         1.0000         1.0000         EPS         
+3.3         1.0000         1.0000         1.0000         EPS         
+3.4         1.0000         1.0000         1.0000         EPS         
+3.5         1.0000         1.0000         1.0000         EPS         
+4.1         1.0000         1.0000         1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/11/16 23:21:34 Page 7
+Lights Out
+Solution Report     SOLVE lights_out Using MIP From line 32
+
+
+     EQU light_state_toggle_eqn  
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+4.2         1.0000         1.0000         1.0000         EPS         
+4.3         1.0000         1.0000         1.0000         EPS         
+4.4         1.0000         1.0000         1.0000         EPS         
+4.5         1.0000         1.0000         1.0000         EPS         
+5.1         1.0000         1.0000         1.0000         EPS         
+5.2         1.0000         1.0000         1.0000         EPS         
+5.3         1.0000         1.0000         1.0000         EPS         
+5.4         1.0000         1.0000         1.0000         EPS         
+5.5         1.0000         1.0000         1.0000         EPS         
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU all_light~          .              .              .              .          
+---- EQU objective~          .              .              .             1.0000      
+
+---- VAR light_status  light status = 0 implies light is off
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+1.1          .              .             1.0000         EPS         
+1.2          .              .             1.0000         EPS         
+1.3          .              .             1.0000         EPS         
+1.4          .              .             1.0000         EPS         
+1.5          .              .             1.0000         EPS         
+2.1          .              .             1.0000         EPS         
+2.2          .              .             1.0000         EPS         
+2.3          .              .             1.0000         EPS         
+2.4          .              .             1.0000         EPS         
+2.5          .              .             1.0000         EPS         
+3.1          .              .             1.0000         EPS         
+3.2          .              .             1.0000         EPS         
+3.3          .              .             1.0000         EPS         
+3.4          .              .             1.0000         EPS         
+3.5          .              .             1.0000         EPS         
+4.1          .              .             1.0000         EPS         
+4.2          .              .             1.0000         EPS         
+4.3          .              .             1.0000         EPS         
+4.4          .              .             1.0000         EPS         
+4.5          .              .             1.0000         EPS         
+5.1          .              .             1.0000         EPS         
+5.2          .              .             1.0000         EPS         
+5.3          .              .             1.0000         EPS         
+5.4          .              .             1.0000         EPS         
+5.5          .              .             1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/11/16 23:21:34 Page 8
+Lights Out
+Solution Report     SOLVE lights_out Using MIP From line 32
+
+
+---- VAR switch_clicked  
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+1.1          .              .             1.0000         1.0000      
+1.2          .              .             1.0000         1.0000      
+1.3          .             1.0000         1.0000         1.0000      
+1.4          .              .             1.0000         1.0000      
+1.5          .              .             1.0000         1.0000      
+2.1          .             1.0000         1.0000         1.0000      
+2.2          .              .             1.0000         1.0000      
+2.3          .              .             1.0000         1.0000      
+2.4          .              .             1.0000         1.0000      
+2.5          .             1.0000         1.0000         1.0000      
+3.1          .              .             1.0000         1.0000      
+3.2          .              .             1.0000         1.0000      
+3.3          .             1.0000         1.0000         1.0000      
+3.4          .              .             1.0000         1.0000      
+3.5          .              .             1.0000         1.0000      
+4.1          .             1.0000         1.0000         1.0000      
+4.2          .              .             1.0000         1.0000      
+4.3          .              .             1.0000         1.0000      
+4.4          .              .             1.0000         1.0000      
+4.5          .             1.0000         1.0000         1.0000      
+5.1          .              .             1.0000         1.0000      
+5.2          .              .             1.0000         1.0000      
+5.3          .             1.0000         1.0000         1.0000      
+5.4          .              .             1.0000         1.0000      
+5.5          .              .             1.0000         1.0000      
+
+---- VAR y  
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+1.1          .              .             2.0000          .          
+1.2          .              .             2.0000          .          
+1.3          .              .             2.0000          .          
+1.4          .              .             2.0000          .          
+1.5          .              .             2.0000          .          
+2.1          .              .             2.0000          .          
+2.2          .              .             2.0000          .          
+2.3          .             0.5000         2.0000          .          
+2.4          .              .             2.0000          .          
+2.5          .              .             2.0000          .          
+3.1          .             0.5000         2.0000          .          
+3.2          .              .             2.0000          .          
+3.3          .              .             2.0000          .          
+3.4          .              .             2.0000          .          
+3.5          .             0.5000         2.0000          .          
+4.1          .              .             2.0000          .          
+4.2          .              .             2.0000          .          
+4.3          .             0.5000         2.0000          .          
+4.4          .              .             2.0000          .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/11/16 23:21:34 Page 9
+Lights Out
+Solution Report     SOLVE lights_out Using MIP From line 32
+
+
+     VAR y  
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+4.5          .              .             2.0000          .          
+5.1          .              .             2.0000          .          
+5.2          .              .             2.0000          .          
+5.3          .              .             2.0000          .          
+5.4          .              .             2.0000          .          
+5.5          .              .             2.0000          .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR num_turns         -INF            7.0000        +INF             .          
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/11/16 23:21:34 Page 10
+Lights Out
+E x e c u t i o n
+
+
+----     35 VARIABLE light_status.L  light status = 0 implies light is off
+
+                      ( ALL       0.000 )
+
+
+
+EXECUTION TIME       =        0.001 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+
+
+USER: CS 524 Course License                          G160914/0001AS-GEN
+      Prof. Ferris, UW-Madison, Fall 2016                        DC2937
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/quickstep/Documents/git-workspace/CS524/HW6/hw6-4.gms
+Output     /Users/quickstep/Documents/git-workspace/CS524/HW6/hw6-4.lst
