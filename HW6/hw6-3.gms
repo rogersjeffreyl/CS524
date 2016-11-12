@@ -31,22 +31,75 @@ set boxops(b,o);
 option boxops < boxmap;
 display boxops ;
 
-parameter binary variable x(r,c,v) "x[r,c,v] = 1 means cell [r,c] is assigned value v";
+binary variable x(r,c,v) "x[r,c,v] = 1 means cell [r,c] is assigned value v";
 
-free variable valincell(r,c);
-
-Equations 
+x.l(r,c,v) =0;
+variable valincell(r,c);
+free variable objective;
+equations 
+  objective_eq,
+  value_in_cell(r,c)     "equation for assigning values to cell" 
   cell_unique_num(r,c)   each cell must be assigned exactly one number
-  row_unqiue_num(r,c)   cells in the same row must be assigned distinct numbers
-  col_unique_num(r,c)   cells in the same column must be assigned distinct numbers; 
+  row_unqiue_num(r,v)   cells in the same row must be assigned distinct numbers
+  col_unique_num(c,v)   cells in the same column must be assigned distinct numbers,
+  addition_constraints(b)  "constraints for addition" ,
+  multiplication_constraints(b),
+  subtraction_constraints_1(b) "constraints for multiplication", 
+  subtraction_constraints_2(b) "constraints for multiplication",
+  division_constraints_1(b),
+  division_constraints_2(b)
 
+display boxmap;
+
+objective_eq..
+    objective =e= 1;
 
 cell_unique_num(r,c)..  
-  sum(v, x[r,c,v]) =e= 1;
+  sum(v, x(r,c,v) )=e= 1;
+
 row_unqiue_num(r,v)..  
-  sum{c, x[r,c,v]} =e= 1;
+  sum(c, x(r,c,v) )=e= 1;
 
 col_unique_num(c,v).. 
-  sum{r, x[r,c,v]}=e= 1;
+  sum(r, x(r,c,v))=e= 1;
 
-fa(i,j,k)$givens[i,j]..  x[i,j,k] =e= ord(k)=givens(i,j);
+value_in_cell(r,c)..
+  valincell(r,c) =e= sum(v,x(r,c,v)*ord(v));
+
+addition_constraints(b)$boxops(b,'a')..
+  value(b) =e= sum((r,c)$boxmap(b,'a',r,c),sum(v,ord(v) *x(r,c,v)));
+
+
+subtraction_constraints_1(b)$boxops(b,'s')..
+  value(b) =e= sum((r,c)$boxmap(b,'s',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*ord(v)));
+
+subtraction_constraints_2(b)$boxops(b,'s')..
+  value(b) =e= -sum((r,c)$boxmap(b,'s',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*ord(v)));
+
+multiplication_constraints(b)$boxops(b,'m')..
+  log(value(b)) =g= sum((r,c)$boxmap(b,'m',r,c),sum(v,x(r,c,v)*log(ord(v))));
+
+division_constraints_1(b)$boxops(b,'d')..
+  log(value(b)) =e= sum((r,c)$boxmap(b,'d',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*log(ord(v))));
+division_constraints_2(b)$boxops(b,'d')..
+  log(value(b)) =e= -sum((r,c)$boxmap(b,'d',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*log(ord(v))));
+
+model kenkensolver / objective_eq,addition_constraints, multiplication_constraints,subtraction_constraints_1,subtraction_constraints_2,division_constraints_1 , division_constraints_2/;
+solve kenkensolver using mip minimizing objective;  
+
+$ontext
+
+parameter results(r,c);
+loop(boxops(b,o),
+     results(r,c)$boxmap(b,o,r,c) =
+       valincell.l(r,c)$add(o)
+       + exp(valincell.l(r,c))$mult(o);
+   );
+display results;
+$offtext
+
+
+  
+
+
+
