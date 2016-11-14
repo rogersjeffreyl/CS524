@@ -8,3 +8,13 @@ parameter demand(nodes,k) /
      23.2 -25, 89.2 25, 10.3 -20, 89.3 20, 20.3 -10, 450.3 10 /;
 parameter capacity(i,j); capacity(i,j) = uniform(75,85);
 
+
+Set s   segments       / s0*s3 /
+    sl  segment labels / x, y coordinates, l length, g slope /;
+
+Table sqrtp(s,sl) piecewise linear function for sqrt
+      x		y 				l                                                g
+s0    0		0 				[sqrt(sqr(log(6)-0)+sqr(5))]                 [log( 6)/5]		
+s1    5		[log(6)] 		[sqrt(sqr(log(11)-log( 6))+sqr(5))]          [(log(11)-log( 6))/5]	
+s2    10	[log(11)] 		[sqrt(sqr(log(101)-log( 11))+sqr(90))]       [(log(101)-log( 11))/90]		
+s3    100	[log(101)] 		+INF                                         [1/101] ;

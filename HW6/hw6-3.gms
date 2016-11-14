@@ -71,23 +71,26 @@ addition_constraints(b)$boxops(b,'a')..
 
 
 subtraction_constraints_1(b)$boxops(b,'s')..
-  value(b) =e= sum((r,c)$boxmap(b,'s',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*ord(v)));
+  sum((r,c)$boxmap(b,'s',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*ord(v))) =l= value(b)  ;
 
 subtraction_constraints_2(b)$boxops(b,'s')..
-  value(b) =e= -sum((r,c)$boxmap(b,'s',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*ord(v)));
+  -sum((r,c)$boxmap(b,'s',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*ord(v))) =l= value(b) ;
 
 multiplication_constraints(b)$boxops(b,'m')..
-  log(value(b)) =g= sum((r,c)$boxmap(b,'m',r,c),sum(v,x(r,c,v)*log(ord(v))));
+  log(value(b)) =e= sum((r,c)$boxmap(b,'m',r,c),sum(v,x(r,c,v)*log(ord(v))));
 
 division_constraints_1(b)$boxops(b,'d')..
-  log(value(b)) =e= sum((r,c)$boxmap(b,'d',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*log(ord(v))));
+  sum((r,c)$boxmap(b,'d',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*log(ord(v)))) =l= log(value(b))  ;
 division_constraints_2(b)$boxops(b,'d')..
-  log(value(b)) =e= -sum((r,c)$boxmap(b,'d',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*log(ord(v))));
+  -sum((r,c)$boxmap(b,'d',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*log(ord(v)))) =l= log(value(b)) ;
 
-model kenkensolver / objective_eq,addition_constraints, multiplication_constraints,subtraction_constraints_1,subtraction_constraints_2,division_constraints_1 , division_constraints_2/;
+model kenkensolver / all/;
+
 solve kenkensolver using mip minimizing objective;  
-
 $ontext
+valincell.L(r,c) = sum(v,x(r,c,v)*ord(v));
+display valincell.L;
+
 
 parameter results(r,c);
 loop(boxops(b,o),
