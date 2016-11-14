@@ -1,6 +1,6 @@
 option seed=0; set nodes /1*500/;
 parameter offset(nodes); offset(nodes) = round(uniform(2,5));
-alias (i,j,nodes); set arcs(nodes,nodes);
+alias (i,j,l,nodes); set arcs(nodes,nodes);
 arcs(i,j) = no; arcs(i,i+1) = yes; arcs(i,i+offset(i)) = yes;
 set k /1*3/;
 parameter demand(nodes,k) /
@@ -18,3 +18,13 @@ s0    0		0 				[sqrt(sqr(log(6)-0)+sqr(5))]                 [log( 6)/5]
 s1    5		[log(6)] 		[sqrt(sqr(log(11)-log( 6))+sqr(5))]          [(log(11)-log( 6))/5]	
 s2    10	[log(11)] 		[sqrt(sqr(log(101)-log( 11))+sqr(90))]       [(log(101)-log( 11))/90]		
 s3    100	[log(101)] 		+INF                                         [1/101] ;
+
+variable x(i,j,k) "quantity of item carried through link i,j";
+
+equations..
+	link_capacity_eq(i,j),
+	demand_supply_equation(i,k);
+link_capacity_eq(i,j)$arcs(i,j)..
+	sum(k,x(i,j,k)) =l= capacity(i,j)
+demand_supply_equation(i,k)..
+	sum(j$arcs(i,j)),x(i,j,k)) -sum(j$(arcs(j,i)),x(j,i,k)) =e=b(i,k);	
