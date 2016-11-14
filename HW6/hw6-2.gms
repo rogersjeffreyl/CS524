@@ -21,10 +21,10 @@ s3    100	[log(101)] 		+INF                                         [1/101] ;
 
 variable x(i,j,k) "quantity of item carried through link i,j";
 
-equations..
+equations
 	link_capacity_eq(i,j),
 	demand_supply_equation(i,k);
 link_capacity_eq(i,j)$arcs(i,j)..
-	sum(k,x(i,j,k)) =l= capacity(i,j)
+	sum(k,x(i,j,k)) =l= capacity(i,j);
 demand_supply_equation(i,k)..
-	sum(j$arcs(i,j)),x(i,j,k)) -sum(j$(arcs(j,i)),x(j,i,k)) =e=b(i,k);	
+	sum(j$arcs(i,j),x(i,j,k)) -sum(j$(arcs(j,i)),x(j,i,k)) =e=demand(i,k);	
