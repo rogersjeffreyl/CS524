@@ -87,8 +87,7 @@ division_constraints_2(b)$boxops(b,'d')..
 model kenkensolver / all/;
 
 solve kenkensolver using mip minimizing objective;  
-$ontext
-valincell.L(r,c) = sum(v,x(r,c,v)*ord(v));
+valincell.L(r,c) = sum(v,x.L(r,c,v)*ord(v));
 display valincell.L;
 
 
@@ -96,10 +95,9 @@ parameter results(r,c);
 loop(boxops(b,o),
      results(r,c)$boxmap(b,o,r,c) =
        valincell.l(r,c)$add(o)
-       + exp(valincell.l(r,c))$mult(o);
+       + valincell.l(r,c)$mult(o);
    );
 display results;
-$offtext
 
 
   
