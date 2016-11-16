@@ -8,8 +8,8 @@ integer variable switch_clicked(i,j) "";
 
 free variable num_turns;
 equations
-	objective_eq,
-    light_state_toggle_eqn(i,j);
+	objective_eq "objective to minimize the number of turns",
+    light_state_toggle_eqn(i,j) "toggling the light state based on initial state";
 
 objective_eq..
 	num_turns =e= sum((i,j),switch_clicked(i,j)); 
@@ -25,12 +25,12 @@ display light_status.L;
 
 
 equations
-	light_state_toggle_eqn_1(i,j);
+	light_state_toggle_eqn_1(i,j) "Equation for toggling the light status depending on the initial state";
 	
 
 switch_clicked.L(i,j)=0;
 
-scalar init /3/;
+scalar init  "scalar indicating the initial state 0-off 1-low 2-mid 3-high" /3/;
 light_state_toggle_eqn_1(i,j)..
 	switch_clicked(i-1,j)+switch_clicked(i,j-1)+switch_clicked(i,j)+switch_clicked(i,j+1)+switch_clicked(i+1,j)+init =e= 4*light_status(i,j);
 

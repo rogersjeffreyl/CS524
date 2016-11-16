@@ -1,49 +1,132 @@
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/06/16 23:15:35 Page 1
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/14/16 21:52:17 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
 
-   1  * Rows/cols labeled from top left corner
-   2  set o operations / m multiply, d divide, a add, s subtract/;
-   3  set mult(o) / m,d /;
-   4  set add(o) / a,s /;
-   5  set diff(o) / d,s /;
-   6  sets r rows / r1 * r6/
-   7       c columns/c1*c6/
-   8       v values /v1*v6/
-   9       b boxes / b1*b15 /;
-  10  parameter value(b) /b1 24, b2 1, b3 3, b4 36, b5 10, b6 7, b7 1, b8 20, b9 20,
-  11    b10 3, b11 11, b12 3, b13 3, b14 1, b15 1/;
-  12  set boxmap(b,o,r,c) /
-  13    b1.m.(r1*r2.c1,r1.c2),
-  14    b2.s.r1.c3*c4,
-  15    b3.d.r1.c5*c6,
-  16    b4.m.(r2.c2*c3,r3.c3),
-  17    b5.a.(r4.c3,r2*r4.c4),
-  18    b6.a.r2.c5*c6,
-  19    b7.s.r3.c1*c2,
-  20    b8.m.(r3.c5*c6,r4.c6),
-  21    b9.m.r4*r6.c1,
-  22    b10.d.r4*r5.c2,
-  23    b11.a.r4*r5.c5,
-  24    b12.s.r5.c3*c4,
-  25    b13.d.r5*r6.c6,
-  26    b14.s.r6.c2*c3,
-  27    b15.s.r6.c4*c5 /;
-  28  set boxops(b,o);
-  29  option boxops < boxmap;
-  30  display boxops ;
-  31   
-  32  sets i / 1*6 /; alias (i,j,k);
+   2   
+   3  * Rows/cols labeled from top left corner
+   4  set o operations / m multiply, d divide, a add, s subtract/;
+   5  set mult(o) / m,d /;
+   6  set add(o) / a,s /;
+   7  set diff(o) / d,s /;
+   8  sets r rows / r1 * r6/
+   9       c columns/c1*c6/
+  10       v values /v1*v6/
+  11       b boxes / b1*b15 /;
+  12  parameter value(b) /b1 24, b2 1, b3 3, b4 36, b5 10, b6 7, b7 1, b8 20, b9 20,
+  13    b10 3, b11 11, b12 3, b13 3, b14 1, b15 1/;
+  14  set boxmap(b,o,r,c) /
+  15    b1.m.(r1*r2.c1,r1.c2),
+  16    b2.s.r1.c3*c4,
+  17    b3.d.r1.c5*c6,
+  18    b4.m.(r2.c2*c3,r3.c3),
+  19    b5.a.(r4.c3,r2*r4.c4),
+  20    b6.a.r2.c5*c6,
+  21    b7.s.r3.c1*c2,
+  22    b8.m.(r3.c5*c6,r4.c6),
+  23    b9.m.r4*r6.c1,
+  24    b10.d.r4*r5.c2,
+  25    b11.a.r4*r5.c5,
+  26    b12.s.r5.c3*c4,
+  27    b13.d.r5*r6.c6,
+  28    b14.s.r6.c2*c3,
+  29    b15.s.r6.c4*c5 /;
+  30  set boxops(b,o);
+  31  option boxops < boxmap;
+  32  display boxops ;
+  33   
+  34  binary variable x(r,c,v) "x[r,c,v] = 1 means cell [r,c] is assigned value v";
+  35   
+  36  x.l(r,c,v) =0;
+  37  variable valincell(r,c);
+  38  free variable objective;
+  39  equations
+  40    objective_eq,
+  41    value_in_cell(r,c)     "equation for assigning values to cell"
+  42    cell_unique_num(r,c)   each cell must be assigned exactly one number
+  43    row_unqiue_num(r,v)   cells in the same row must be assigned distinct numbers
+  44    col_unique_num(c,v)   cells in the same column must be assigned distinct numbers,
+  45    addition_constraints(b)  "constraints for addition" ,
+  46    multiplication_constraints(b),
+  47    subtraction_constraints_1(b) "constraints for multiplication",
+  48    subtraction_constraints_2(b) "constraints for multiplication",
+  49    division_constraints_1(b),
+  50    division_constraints_2(b)
+  51   
+  52  display boxmap;
+  53   
+  54  objective_eq..
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/14/16 21:52:17 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
 
 
-COMPILATION TIME     =        0.000 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/06/16 23:15:35 Page 2
+  55      objective =e= 1;
+  56   
+  57  cell_unique_num(r,c)..
+  58    sum(v, x(r,c,v) )=e= 1;
+  59   
+  60  row_unqiue_num(r,v)..
+  61    sum(c, x(r,c,v) )=e= 1;
+  62   
+  63  col_unique_num(c,v)..
+  64    sum(r, x(r,c,v))=e= 1;
+  65   
+  66  value_in_cell(r,c)..
+  67    valincell(r,c) =e= sum(v,x(r,c,v)*ord(v));
+  68   
+  69  addition_constraints(b)$boxops(b,'a')..
+  70    value(b) =e= sum((r,c)$boxmap(b,'a',r,c),sum(v,ord(v) *x(r,c,v)));
+  71   
+  72   
+  73  subtraction_constraints_1(b)$boxops(b,'s')..
+  74    sum((r,c)$boxmap(b,'s',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*ord(v))) =l= value(b)  ;
+  75   
+  76  subtraction_constraints_2(b)$boxops(b,'s')..
+  77    -sum((r,c)$boxmap(b,'s',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*ord(v))) =l= value(b) ;
+  78   
+  79  multiplication_constraints(b)$boxops(b,'m')..
+  80    log(value(b)) =e= sum((r,c)$boxmap(b,'m',r,c),sum(v,x(r,c,v)*log(ord(v))));
+  81   
+  82  division_constraints_1(b)$boxops(b,'d')..
+  83    sum((r,c)$boxmap(b,'d',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*log(ord(v)))) =l= log(value(b))  ;
+  84  division_constraints_2(b)$boxops(b,'d')..
+  85    -sum((r,c)$boxmap(b,'d',r,c),power((-1),ord(r))*power((-1),ord(c))*sum(v,x(r,c,v)*log(ord(v)))) =l= log(value(b)) ;
+  86   
+  87  model kenkensolver / all/;
+  88   
+  89  solve kenkensolver using mip minimizing objective;
+  90  valincell.L(r,c) = sum(v,x.L(r,c,v)*ord(v));
+  91  display valincell.L;
+  92   
+  93   
+  94  parameter results(r,c);
+  95  loop(boxops(b,o),
+  96       results(r,c)$boxmap(b,o,r,c) =
+  97         valincell.l(r,c)$add(o)
+  98         + valincell.l(r,c)$mult(o);
+  99     );
+ 100  display results;
+ 101   
+ 102   
+ 103   
+ 104   
+ 105   
+ 106   
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/14/16 21:52:17 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+
+
+COMPILATION TIME     =        0.001 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/14/16 21:52:17 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
 
-----     30 SET boxops  
+----     32 SET boxops  
 
               m           d           a           s
 
@@ -64,8 +147,980 @@ b14                                             YES
 b15                                             YES
 
 
+----     52 SET boxmap  
 
-EXECUTION TIME       =        0.001 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+INDEX 1 = b1
+
+              c1          c2
+
+m.r1         YES         YES
+m.r2         YES
+
+INDEX 1 = b2
+
+              c3          c4
+
+s.r1         YES         YES
+
+INDEX 1 = b3
+
+              c5          c6
+
+d.r1         YES         YES
+
+INDEX 1 = b4
+
+              c2          c3
+
+m.r2         YES         YES
+m.r3                     YES
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/14/16 21:52:17 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+         52 SET boxmap  
+
+INDEX 1 = b5
+
+              c3          c4
+
+a.r2                     YES
+a.r3                     YES
+a.r4         YES         YES
+
+INDEX 1 = b6
+
+              c5          c6
+
+a.r2         YES         YES
+
+INDEX 1 = b7
+
+              c1          c2
+
+s.r3         YES         YES
+
+INDEX 1 = b8
+
+              c5          c6
+
+m.r3         YES         YES
+m.r4                     YES
+
+INDEX 1 = b9
+
+              c1
+
+m.r4         YES
+m.r5         YES
+m.r6         YES
+
+INDEX 1 = b10
+
+              c2
+
+d.r4         YES
+d.r5         YES
+
+INDEX 1 = b11
+
+              c5
+
+a.r4         YES
+a.r5         YES
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/14/16 21:52:17 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+         52 SET boxmap  
+
+INDEX 1 = b12
+
+              c3          c4
+
+s.r5         YES         YES
+
+INDEX 1 = b13
+
+              c6
+
+d.r5         YES
+d.r6         YES
+
+INDEX 1 = b14
+
+              c2          c3
+
+s.r6         YES         YES
+
+INDEX 1 = b15
+
+              c4          c5
+
+s.r6         YES         YES
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/14/16 21:52:17 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE kenkensolver Using MIP From line 89
+
+
+---- objective_eq  =E=  
+
+objective_eq..  objective =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+
+---- value_in_cell  =E=  equation for assigning values to cell
+
+value_in_cell(r1,c1)..  - x(r1,c1,v1) - 2*x(r1,c1,v2) - 3*x(r1,c1,v3) - 4*x(r1,c1,v4) - 5*x(r1,c1,v5) - 6*x(r1,c1,v6) + valincell(r1,c1) =E= 0 ; (LHS = 0)
+     
+value_in_cell(r1,c2)..  - x(r1,c2,v1) - 2*x(r1,c2,v2) - 3*x(r1,c2,v3) - 4*x(r1,c2,v4) - 5*x(r1,c2,v5) - 6*x(r1,c2,v6) + valincell(r1,c2) =E= 0 ; (LHS = 0)
+     
+value_in_cell(r1,c3)..  - x(r1,c3,v1) - 2*x(r1,c3,v2) - 3*x(r1,c3,v3) - 4*x(r1,c3,v4) - 5*x(r1,c3,v5) - 6*x(r1,c3,v6) + valincell(r1,c3) =E= 0 ; (LHS = 0)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- cell_unique_num  =E=  each cell must be assigned exactly one number
+
+cell_unique_num(r1,c1)..  x(r1,c1,v1) + x(r1,c1,v2) + x(r1,c1,v3) + x(r1,c1,v4) + x(r1,c1,v5) + x(r1,c1,v6) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+cell_unique_num(r1,c2)..  x(r1,c2,v1) + x(r1,c2,v2) + x(r1,c2,v3) + x(r1,c2,v4) + x(r1,c2,v5) + x(r1,c2,v6) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+cell_unique_num(r1,c3)..  x(r1,c3,v1) + x(r1,c3,v2) + x(r1,c3,v3) + x(r1,c3,v4) + x(r1,c3,v5) + x(r1,c3,v6) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- row_unqiue_num  =E=  cells in the same row must be assigned distinct numbers
+
+row_unqiue_num(r1,v1)..  x(r1,c1,v1) + x(r1,c2,v1) + x(r1,c3,v1) + x(r1,c4,v1) + x(r1,c5,v1) + x(r1,c6,v1) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+row_unqiue_num(r1,v2)..  x(r1,c1,v2) + x(r1,c2,v2) + x(r1,c3,v2) + x(r1,c4,v2) + x(r1,c5,v2) + x(r1,c6,v2) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+row_unqiue_num(r1,v3)..  x(r1,c1,v3) + x(r1,c2,v3) + x(r1,c3,v3) + x(r1,c4,v3) + x(r1,c5,v3) + x(r1,c6,v3) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+
+---- col_unique_num  =E=  cells in the same column must be assigned distinct numbers
+
+col_unique_num(c1,v1)..  x(r1,c1,v1) + x(r2,c1,v1) + x(r3,c1,v1) + x(r4,c1,v1) + x(r5,c1,v1) + x(r6,c1,v1) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+col_unique_num(c1,v2)..  x(r1,c1,v2) + x(r2,c1,v2) + x(r3,c1,v2) + x(r4,c1,v2) + x(r5,c1,v2) + x(r6,c1,v2) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+col_unique_num(c1,v3)..  x(r1,c1,v3) + x(r2,c1,v3) + x(r3,c1,v3) + x(r4,c1,v3) + x(r5,c1,v3) + x(r6,c1,v3) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+REMAINING 33 ENTRIES SKIPPED
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/14/16 21:52:17 Page 8
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE kenkensolver Using MIP From line 89
+
+
+---- addition_constraints  =E=  constraints for addition
+
+addition_constraints(b5)..  - x(r2,c4,v1) - 2*x(r2,c4,v2) - 3*x(r2,c4,v3) - 4*x(r2,c4,v4) - 5*x(r2,c4,v5) - 6*x(r2,c4,v6) - x(r3,c4,v1) - 2*x(r3,c4,v2) - 3*x(r3,c4,v3) - 4*x(r3,c4,v4) - 5*x(r3,c4,v5) - 6*x(r3,c4,v6) - x(r4,c3,v1) - 2*x(r4,c3,v2)
+     
+      - 3*x(r4,c3,v3) - 4*x(r4,c3,v4) - 5*x(r4,c3,v5) - 6*x(r4,c3,v6) - x(r4,c4,v1) - 2*x(r4,c4,v2) - 3*x(r4,c4,v3) - 4*x(r4,c4,v4) - 5*x(r4,c4,v5) - 6*x(r4,c4,v6) =E= -10 ; (LHS = 0, INFES = 10 ****)
+     
+addition_constraints(b6)..  - x(r2,c5,v1) - 2*x(r2,c5,v2) - 3*x(r2,c5,v3) - 4*x(r2,c5,v4) - 5*x(r2,c5,v5) - 6*x(r2,c5,v6) - x(r2,c6,v1) - 2*x(r2,c6,v2) - 3*x(r2,c6,v3) - 4*x(r2,c6,v4) - 5*x(r2,c6,v5) - 6*x(r2,c6,v6) =E= -7 ; (LHS = 0, INFES = 7 ****)
+     
+addition_constraints(b11)..  - x(r4,c5,v1) - 2*x(r4,c5,v2) - 3*x(r4,c5,v3) - 4*x(r4,c5,v4) - 5*x(r4,c5,v5) - 6*x(r4,c5,v6) - x(r5,c5,v1) - 2*x(r5,c5,v2) - 3*x(r5,c5,v3) - 4*x(r5,c5,v4) - 5*x(r5,c5,v5) - 6*x(r5,c5,v6) =E= -11 ; (LHS = 0, INFES = 11 ****)
+     
+
+---- multiplication_constraints  =E=  
+
+multiplication_constraints(b1)..  - 0.693147180559945*x(r1,c1,v2) - 1.09861228866811*x(r1,c1,v3) - 1.38629436111989*x(r1,c1,v4) - 1.6094379124341*x(r1,c1,v5) - 1.79175946922805*x(r1,c1,v6) - 0.693147180559945*x(r1,c2,v2) - 1.09861228866811*x(r1,c2,v3)
+     
+      - 1.38629436111989*x(r1,c2,v4) - 1.6094379124341*x(r1,c2,v5) - 1.79175946922805*x(r1,c2,v6) - 0.693147180559945*x(r2,c1,v2) - 1.09861228866811*x(r2,c1,v3) - 1.38629436111989*x(r2,c1,v4) - 1.6094379124341*x(r2,c1,v5) - 1.79175946922805*x(r2,c1,v6)
+      =E= -3.17805383034795 ; (LHS = 0, INFES = 3.17805383034795 ****)
+     
+multiplication_constraints(b4)..  - 0.693147180559945*x(r2,c2,v2) - 1.09861228866811*x(r2,c2,v3) - 1.38629436111989*x(r2,c2,v4) - 1.6094379124341*x(r2,c2,v5) - 1.79175946922805*x(r2,c2,v6) - 0.693147180559945*x(r2,c3,v2) - 1.09861228866811*x(r2,c3,v3)
+     
+      - 1.38629436111989*x(r2,c3,v4) - 1.6094379124341*x(r2,c3,v5) - 1.79175946922805*x(r2,c3,v6) - 0.693147180559945*x(r3,c3,v2) - 1.09861228866811*x(r3,c3,v3) - 1.38629436111989*x(r3,c3,v4) - 1.6094379124341*x(r3,c3,v5) - 1.79175946922805*x(r3,c3,v6)
+      =E= -3.58351893845611 ; (LHS = 0, INFES = 3.58351893845611 ****)
+     
+multiplication_constraints(b8)..  - 0.693147180559945*x(r3,c5,v2) - 1.09861228866811*x(r3,c5,v3) - 1.38629436111989*x(r3,c5,v4) - 1.6094379124341*x(r3,c5,v5) - 1.79175946922805*x(r3,c5,v6) - 0.693147180559945*x(r3,c6,v2) - 1.09861228866811*x(r3,c6,v3)
+     
+      - 1.38629436111989*x(r3,c6,v4) - 1.6094379124341*x(r3,c6,v5) - 1.79175946922805*x(r3,c6,v6) - 0.693147180559945*x(r4,c6,v2) - 1.09861228866811*x(r4,c6,v3) - 1.38629436111989*x(r4,c6,v4) - 1.6094379124341*x(r4,c6,v5) - 1.79175946922805*x(r4,c6,v6)
+      =E= -2.99573227355399 ; (LHS = 0, INFES = 2.99573227355399 ****)
+     
+REMAINING ENTRY SKIPPED
+
+
+---- subtraction_constraints_1  =L=  constraints for multiplication
+
+subtraction_constraints_1(b2)..  x(r1,c3,v1) + 2*x(r1,c3,v2) + 3*x(r1,c3,v3) + 4*x(r1,c3,v4) + 5*x(r1,c3,v5) + 6*x(r1,c3,v6) - x(r1,c4,v1) - 2*x(r1,c4,v2) - 3*x(r1,c4,v3) - 4*x(r1,c4,v4) - 5*x(r1,c4,v5) - 6*x(r1,c4,v6) =L= 1 ; (LHS = 0)
+     
+subtraction_constraints_1(b7)..  x(r3,c1,v1) + 2*x(r3,c1,v2) + 3*x(r3,c1,v3) + 4*x(r3,c1,v4) + 5*x(r3,c1,v5) + 6*x(r3,c1,v6) - x(r3,c2,v1) - 2*x(r3,c2,v2) - 3*x(r3,c2,v3) - 4*x(r3,c2,v4) - 5*x(r3,c2,v5) - 6*x(r3,c2,v6) =L= 1 ; (LHS = 0)
+     
+subtraction_constraints_1(b12)..  x(r5,c3,v1) + 2*x(r5,c3,v2) + 3*x(r5,c3,v3) + 4*x(r5,c3,v4) + 5*x(r5,c3,v5) + 6*x(r5,c3,v6) - x(r5,c4,v1) - 2*x(r5,c4,v2) - 3*x(r5,c4,v3) - 4*x(r5,c4,v4) - 5*x(r5,c4,v5) - 6*x(r5,c4,v6) =L= 3 ; (LHS = 0)
+     
+REMAINING 2 ENTRIES SKIPPED
+
+
+---- subtraction_constraints_2  =L=  constraints for multiplication
+
+subtraction_constraints_2(b2)..  - x(r1,c3,v1) - 2*x(r1,c3,v2) - 3*x(r1,c3,v3) - 4*x(r1,c3,v4) - 5*x(r1,c3,v5) - 6*x(r1,c3,v6) + x(r1,c4,v1) + 2*x(r1,c4,v2) + 3*x(r1,c4,v3) + 4*x(r1,c4,v4) + 5*x(r1,c4,v5) + 6*x(r1,c4,v6) =L= 1 ; (LHS = 0)
+     
+subtraction_constraints_2(b7)..  - x(r3,c1,v1) - 2*x(r3,c1,v2) - 3*x(r3,c1,v3) - 4*x(r3,c1,v4) - 5*x(r3,c1,v5) - 6*x(r3,c1,v6) + x(r3,c2,v1) + 2*x(r3,c2,v2) + 3*x(r3,c2,v3) + 4*x(r3,c2,v4) + 5*x(r3,c2,v5) + 6*x(r3,c2,v6) =L= 1 ; (LHS = 0)
+     
+subtraction_constraints_2(b12)..  - x(r5,c3,v1) - 2*x(r5,c3,v2) - 3*x(r5,c3,v3) - 4*x(r5,c3,v4) - 5*x(r5,c3,v5) - 6*x(r5,c3,v6) + x(r5,c4,v1) + 2*x(r5,c4,v2) + 3*x(r5,c4,v3) + 4*x(r5,c4,v4) + 5*x(r5,c4,v5) + 6*x(r5,c4,v6) =L= 3 ; (LHS = 0)
+     
+REMAINING 2 ENTRIES SKIPPED
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/14/16 21:52:17 Page 9
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE kenkensolver Using MIP From line 89
+
+
+---- division_constraints_1  =L=  
+
+division_constraints_1(b3)..  0.693147180559945*x(r1,c5,v2) + 1.09861228866811*x(r1,c5,v3) + 1.38629436111989*x(r1,c5,v4) + 1.6094379124341*x(r1,c5,v5) + 1.79175946922805*x(r1,c5,v6) - 0.693147180559945*x(r1,c6,v2) - 1.09861228866811*x(r1,c6,v3)
+     
+      - 1.38629436111989*x(r1,c6,v4) - 1.6094379124341*x(r1,c6,v5) - 1.79175946922805*x(r1,c6,v6) =L= 1.09861228866811 ; (LHS = 0)
+     
+division_constraints_1(b10)..  0.693147180559945*x(r4,c2,v2) + 1.09861228866811*x(r4,c2,v3) + 1.38629436111989*x(r4,c2,v4) + 1.6094379124341*x(r4,c2,v5) + 1.79175946922805*x(r4,c2,v6) - 0.693147180559945*x(r5,c2,v2) - 1.09861228866811*x(r5,c2,v3)
+     
+      - 1.38629436111989*x(r5,c2,v4) - 1.6094379124341*x(r5,c2,v5) - 1.79175946922805*x(r5,c2,v6) =L= 1.09861228866811 ; (LHS = 0)
+     
+division_constraints_1(b13)..  - 0.693147180559945*x(r5,c6,v2) - 1.09861228866811*x(r5,c6,v3) - 1.38629436111989*x(r5,c6,v4) - 1.6094379124341*x(r5,c6,v5) - 1.79175946922805*x(r5,c6,v6) + 0.693147180559945*x(r6,c6,v2) + 1.09861228866811*x(r6,c6,v3)
+     
+      + 1.38629436111989*x(r6,c6,v4) + 1.6094379124341*x(r6,c6,v5) + 1.79175946922805*x(r6,c6,v6) =L= 1.09861228866811 ; (LHS = 0)
+     
+
+---- division_constraints_2  =L=  
+
+division_constraints_2(b3)..  - 0.693147180559945*x(r1,c5,v2) - 1.09861228866811*x(r1,c5,v3) - 1.38629436111989*x(r1,c5,v4) - 1.6094379124341*x(r1,c5,v5) - 1.79175946922805*x(r1,c5,v6) + 0.693147180559945*x(r1,c6,v2) + 1.09861228866811*x(r1,c6,v3)
+     
+      + 1.38629436111989*x(r1,c6,v4) + 1.6094379124341*x(r1,c6,v5) + 1.79175946922805*x(r1,c6,v6) =L= 1.09861228866811 ; (LHS = 0)
+     
+division_constraints_2(b10)..  - 0.693147180559945*x(r4,c2,v2) - 1.09861228866811*x(r4,c2,v3) - 1.38629436111989*x(r4,c2,v4) - 1.6094379124341*x(r4,c2,v5) - 1.79175946922805*x(r4,c2,v6) + 0.693147180559945*x(r5,c2,v2) + 1.09861228866811*x(r5,c2,v3)
+     
+      + 1.38629436111989*x(r5,c2,v4) + 1.6094379124341*x(r5,c2,v5) + 1.79175946922805*x(r5,c2,v6) =L= 1.09861228866811 ; (LHS = 0)
+     
+division_constraints_2(b13)..  0.693147180559945*x(r5,c6,v2) + 1.09861228866811*x(r5,c6,v3) + 1.38629436111989*x(r5,c6,v4) + 1.6094379124341*x(r5,c6,v5) + 1.79175946922805*x(r5,c6,v6) - 0.693147180559945*x(r6,c6,v2) - 1.09861228866811*x(r6,c6,v3)
+     
+      - 1.38629436111989*x(r6,c6,v4) - 1.6094379124341*x(r6,c6,v5) - 1.79175946922805*x(r6,c6,v6) =L= 1.09861228866811 ; (LHS = 0)
+     
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 10
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE kenkensolver Using MIP From line 89
+
+
+---- x  x[r,c,v] = 1 means cell [r,c] is assigned value v
+
+x(r1,c1,v1)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+       -1       value_in_cell(r1,c1)
+        1       cell_unique_num(r1,c1)
+        1       row_unqiue_num(r1,v1)
+        1       col_unique_num(c1,v1)
+
+x(r1,c1,v2)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+       -2       value_in_cell(r1,c1)
+        1       cell_unique_num(r1,c1)
+        1       row_unqiue_num(r1,v2)
+        1       col_unique_num(c1,v2)
+       -0.6931  multiplication_constraints(b1)
+
+x(r1,c1,v3)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+       -3       value_in_cell(r1,c1)
+        1       cell_unique_num(r1,c1)
+        1       row_unqiue_num(r1,v3)
+        1       col_unique_num(c1,v3)
+       -1.0986  multiplication_constraints(b1)
+
+REMAINING 213 ENTRIES SKIPPED
+
+---- valincell  
+
+valincell(r1,c1)
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       value_in_cell(r1,c1)
+
+valincell(r1,c2)
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       value_in_cell(r1,c2)
+
+valincell(r1,c3)
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       value_in_cell(r1,c3)
+
+REMAINING 33 ENTRIES SKIPPED
+
+---- objective  
+
+objective
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       objective_eq
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 11
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE kenkensolver Using MIP From line 89
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS          11     SINGLE EQUATIONS          168
+BLOCKS OF VARIABLES           3     SINGLE VARIABLES          253
+NON ZERO ELEMENTS         1,189     DISCRETE VARIABLES        216
+
+
+GENERATION TIME      =        0.005 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+
+
+EXECUTION TIME       =        0.005 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 12
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   kenkensolver        OBJECTIVE  objective
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  89
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                1.0000
+
+ RESOURCE USAGE, LIMIT          0.108      1000.000
+ ITERATION COUNT, LIMIT      2232    2000000000
+
+IBM ILOG CPLEX   24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.6.3.0
+
+Space for names approximately 0.01 Mb
+Use option 'names no' to turn use of names off
+MIP status(101): integer optimal solution
+Cplex Time: 0.10sec (det. 110.81 ticks)
+Fixing integer variables, and solving final LP...
+Fixed MIP status(1): optimal
+Cplex Time: 0.00sec (det. 0.15 ticks)
+Proven optimal solution.
+
+MIP Solution:            1.000000    (2232 iterations, 38 nodes)
+Final Solve:             1.000000    (0 iterations)
+
+Best possible:           1.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU objective~         1.0000         1.0000         1.0000         1.0000      
+
+---- EQU value_in_cell  equation for assigning values to cell
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+r1.c1          .              .              .             EPS         
+r1.c2          .              .              .             EPS         
+r1.c3          .              .              .             EPS         
+r1.c4          .              .              .             EPS         
+r1.c5          .              .              .             EPS         
+r1.c6          .              .              .             EPS         
+r2.c1          .              .              .             EPS         
+r2.c2          .              .              .             EPS         
+r2.c3          .              .              .             EPS         
+r2.c4          .              .              .             EPS         
+r2.c5          .              .              .             EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 13
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+     EQU value_in_cell  equation for assigning values to cell
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+r2.c6          .              .              .             EPS         
+r3.c1          .              .              .             EPS         
+r3.c2          .              .              .             EPS         
+r3.c3          .              .              .             EPS         
+r3.c4          .              .              .             EPS         
+r3.c5          .              .              .             EPS         
+r3.c6          .              .              .             EPS         
+r4.c1          .              .              .             EPS         
+r4.c2          .              .              .             EPS         
+r4.c3          .              .              .             EPS         
+r4.c4          .              .              .             EPS         
+r4.c5          .              .              .             EPS         
+r4.c6          .              .              .             EPS         
+r5.c1          .              .              .             EPS         
+r5.c2          .              .              .             EPS         
+r5.c3          .              .              .             EPS         
+r5.c4          .              .              .             EPS         
+r5.c5          .              .              .             EPS         
+r5.c6          .              .              .             EPS         
+r6.c1          .              .              .             EPS         
+r6.c2          .              .              .             EPS         
+r6.c3          .              .              .             EPS         
+r6.c4          .              .              .             EPS         
+r6.c5          .              .              .             EPS         
+r6.c6          .              .              .             EPS         
+
+---- EQU cell_unique_num  each cell must be assigned exactly one number
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+r1.c1         1.0000         1.0000         1.0000          .          
+r1.c2         1.0000         1.0000         1.0000          .          
+r1.c3         1.0000         1.0000         1.0000          .          
+r1.c4         1.0000         1.0000         1.0000          .          
+r1.c5         1.0000         1.0000         1.0000          .          
+r1.c6         1.0000         1.0000         1.0000          .          
+r2.c1         1.0000         1.0000         1.0000          .          
+r2.c2         1.0000         1.0000         1.0000          .          
+r2.c3         1.0000         1.0000         1.0000          .          
+r2.c4         1.0000         1.0000         1.0000          .          
+r2.c5         1.0000         1.0000         1.0000          .          
+r2.c6         1.0000         1.0000         1.0000          .          
+r3.c1         1.0000         1.0000         1.0000          .          
+r3.c2         1.0000         1.0000         1.0000          .          
+r3.c3         1.0000         1.0000         1.0000          .          
+r3.c4         1.0000         1.0000         1.0000          .          
+r3.c5         1.0000         1.0000         1.0000          .          
+r3.c6         1.0000         1.0000         1.0000          .          
+r4.c1         1.0000         1.0000         1.0000          .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 14
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+     EQU cell_unique_num  each cell must be assigned exactly one number
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+r4.c2         1.0000         1.0000         1.0000          .          
+r4.c3         1.0000         1.0000         1.0000          .          
+r4.c4         1.0000         1.0000         1.0000          .          
+r4.c5         1.0000         1.0000         1.0000          .          
+r4.c6         1.0000         1.0000         1.0000          .          
+r5.c1         1.0000         1.0000         1.0000          .          
+r5.c2         1.0000         1.0000         1.0000          .          
+r5.c3         1.0000         1.0000         1.0000          .          
+r5.c4         1.0000         1.0000         1.0000          .          
+r5.c5         1.0000         1.0000         1.0000          .          
+r5.c6         1.0000         1.0000         1.0000          .          
+r6.c1         1.0000         1.0000         1.0000          .          
+r6.c2         1.0000         1.0000         1.0000          .          
+r6.c3         1.0000         1.0000         1.0000          .          
+r6.c4         1.0000         1.0000         1.0000          .          
+r6.c5         1.0000         1.0000         1.0000          .          
+r6.c6         1.0000         1.0000         1.0000          .          
+
+---- EQU row_unqiue_num  cells in the same row must be assigned distinct numbers
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+r1.v1         1.0000         1.0000         1.0000          .          
+r1.v2         1.0000         1.0000         1.0000          .          
+r1.v3         1.0000         1.0000         1.0000          .          
+r1.v4         1.0000         1.0000         1.0000          .          
+r1.v5         1.0000         1.0000         1.0000          .          
+r1.v6         1.0000         1.0000         1.0000          .          
+r2.v1         1.0000         1.0000         1.0000          .          
+r2.v2         1.0000         1.0000         1.0000          .          
+r2.v3         1.0000         1.0000         1.0000          .          
+r2.v4         1.0000         1.0000         1.0000          .          
+r2.v5         1.0000         1.0000         1.0000          .          
+r2.v6         1.0000         1.0000         1.0000          .          
+r3.v1         1.0000         1.0000         1.0000          .          
+r3.v2         1.0000         1.0000         1.0000          .          
+r3.v3         1.0000         1.0000         1.0000          .          
+r3.v4         1.0000         1.0000         1.0000          .          
+r3.v5         1.0000         1.0000         1.0000          .          
+r3.v6         1.0000         1.0000         1.0000          .          
+r4.v1         1.0000         1.0000         1.0000          .          
+r4.v2         1.0000         1.0000         1.0000          .          
+r4.v3         1.0000         1.0000         1.0000          .          
+r4.v4         1.0000         1.0000         1.0000          .          
+r4.v5         1.0000         1.0000         1.0000          .          
+r4.v6         1.0000         1.0000         1.0000          .          
+r5.v1         1.0000         1.0000         1.0000          .          
+r5.v2         1.0000         1.0000         1.0000          .          
+r5.v3         1.0000         1.0000         1.0000          .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 15
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+     EQU row_unqiue_num  cells in the same row must be assigned distinct numbers
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+r5.v4         1.0000         1.0000         1.0000          .          
+r5.v5         1.0000         1.0000         1.0000          .          
+r5.v6         1.0000         1.0000         1.0000          .          
+r6.v1         1.0000         1.0000         1.0000          .          
+r6.v2         1.0000         1.0000         1.0000          .          
+r6.v3         1.0000         1.0000         1.0000          .          
+r6.v4         1.0000         1.0000         1.0000          .          
+r6.v5         1.0000         1.0000         1.0000          .          
+r6.v6         1.0000         1.0000         1.0000          .          
+
+---- EQU col_unique_num  cells in the same column must be assigned distinct numbers
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+c1.v1         1.0000         1.0000         1.0000          .          
+c1.v2         1.0000         1.0000         1.0000          .          
+c1.v3         1.0000         1.0000         1.0000          .          
+c1.v4         1.0000         1.0000         1.0000          .          
+c1.v5         1.0000         1.0000         1.0000          .          
+c1.v6         1.0000         1.0000         1.0000          .          
+c2.v1         1.0000         1.0000         1.0000          .          
+c2.v2         1.0000         1.0000         1.0000          .          
+c2.v3         1.0000         1.0000         1.0000          .          
+c2.v4         1.0000         1.0000         1.0000          .          
+c2.v5         1.0000         1.0000         1.0000          .          
+c2.v6         1.0000         1.0000         1.0000          .          
+c3.v1         1.0000         1.0000         1.0000          .          
+c3.v2         1.0000         1.0000         1.0000          .          
+c3.v3         1.0000         1.0000         1.0000          .          
+c3.v4         1.0000         1.0000         1.0000          .          
+c3.v5         1.0000         1.0000         1.0000          .          
+c3.v6         1.0000         1.0000         1.0000          .          
+c4.v1         1.0000         1.0000         1.0000          .          
+c4.v2         1.0000         1.0000         1.0000          .          
+c4.v3         1.0000         1.0000         1.0000          .          
+c4.v4         1.0000         1.0000         1.0000          .          
+c4.v5         1.0000         1.0000         1.0000          .          
+c4.v6         1.0000         1.0000         1.0000          .          
+c5.v1         1.0000         1.0000         1.0000          .          
+c5.v2         1.0000         1.0000         1.0000          .          
+c5.v3         1.0000         1.0000         1.0000          .          
+c5.v4         1.0000         1.0000         1.0000          .          
+c5.v5         1.0000         1.0000         1.0000          .          
+c5.v6         1.0000         1.0000         1.0000          .          
+c6.v1         1.0000         1.0000         1.0000          .          
+c6.v2         1.0000         1.0000         1.0000          .          
+c6.v3         1.0000         1.0000         1.0000          .          
+c6.v4         1.0000         1.0000         1.0000          .          
+c6.v5         1.0000         1.0000         1.0000          .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 16
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+     EQU col_unique_num  cells in the same column must be assigned distinct numbers
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+c6.v6         1.0000         1.0000         1.0000          .          
+
+---- EQU addition_constraints  constraints for addition
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+b5        -10.0000       -10.0000       -10.0000          .          
+b6         -7.0000        -7.0000        -7.0000          .          
+b11       -11.0000       -11.0000       -11.0000          .          
+
+---- EQU multiplication_constraints  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+b1        -3.1781        -3.1781        -3.1781          .          
+b4        -3.5835        -3.5835        -3.5835          .          
+b8        -2.9957        -2.9957        -2.9957          .          
+b9        -2.9957        -2.9957        -2.9957          .          
+
+---- EQU subtraction_constraints_1  constraints for multiplication
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+b2         -INF            1.0000         1.0000          .          
+b7         -INF           -1.0000         1.0000          .          
+b12        -INF           -3.0000         3.0000          .          
+b14        -INF            1.0000         1.0000          .          
+b15        -INF            1.0000         1.0000          .          
+
+---- EQU subtraction_constraints_2  constraints for multiplication
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+b2         -INF           -1.0000         1.0000          .          
+b7         -INF            1.0000         1.0000          .          
+b12        -INF            3.0000         3.0000          .          
+b14        -INF           -1.0000         1.0000          .          
+b15        -INF           -1.0000         1.0000          .          
+
+---- EQU division_constraints_1  
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+b3         -INF            1.0986         1.0986          .          
+b10        -INF            1.0986         1.0986          .          
+b13        -INF            1.0986         1.0986          .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 17
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+---- EQU division_constraints_2  
+
+           LOWER          LEVEL          UPPER         MARGINAL
+
+b3         -INF           -1.0986         1.0986          .          
+b10        -INF           -1.0986         1.0986          .          
+b13        -INF           -1.0986         1.0986          .          
+
+---- VAR x  x[r,c,v] = 1 means cell [r,c] is assigned value v
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+r1.c1.v1          .              .             1.0000         EPS         
+r1.c1.v2          .              .             1.0000         EPS         
+r1.c1.v3          .              .             1.0000         EPS         
+r1.c1.v4          .              .             1.0000         EPS         
+r1.c1.v5          .              .             1.0000         EPS         
+r1.c1.v6          .             1.0000         1.0000         EPS         
+r1.c2.v1          .              .             1.0000         EPS         
+r1.c2.v2          .             1.0000         1.0000         EPS         
+r1.c2.v3          .              .             1.0000         EPS         
+r1.c2.v4          .              .             1.0000         EPS         
+r1.c2.v5          .              .             1.0000         EPS         
+r1.c2.v6          .              .             1.0000         EPS         
+r1.c3.v1          .              .             1.0000         EPS         
+r1.c3.v2          .              .             1.0000         EPS         
+r1.c3.v3          .              .             1.0000         EPS         
+r1.c3.v4          .              .             1.0000         EPS         
+r1.c3.v5          .             1.0000         1.0000         EPS         
+r1.c3.v6          .              .             1.0000         EPS         
+r1.c4.v1          .              .             1.0000         EPS         
+r1.c4.v2          .              .             1.0000         EPS         
+r1.c4.v3          .              .             1.0000         EPS         
+r1.c4.v4          .             1.0000         1.0000         EPS         
+r1.c4.v5          .              .             1.0000         EPS         
+r1.c4.v6          .              .             1.0000         EPS         
+r1.c5.v1          .              .             1.0000         EPS         
+r1.c5.v2          .              .             1.0000         EPS         
+r1.c5.v3          .             1.0000         1.0000         EPS         
+r1.c5.v4          .              .             1.0000         EPS         
+r1.c5.v5          .              .             1.0000         EPS         
+r1.c5.v6          .              .             1.0000         EPS         
+r1.c6.v1          .             1.0000         1.0000         EPS         
+r1.c6.v2          .              .             1.0000         EPS         
+r1.c6.v3          .              .             1.0000         EPS         
+r1.c6.v4          .              .             1.0000         EPS         
+r1.c6.v5          .              .             1.0000         EPS         
+r1.c6.v6          .              .             1.0000         EPS         
+r2.c1.v1          .              .             1.0000         EPS         
+r2.c1.v2          .             1.0000         1.0000         EPS         
+r2.c1.v3          .              .             1.0000         EPS         
+r2.c1.v4          .              .             1.0000         EPS         
+r2.c1.v5          .              .             1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 18
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+     VAR x  x[r,c,v] = 1 means cell [r,c] is assigned value v
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+r2.c1.v6          .              .             1.0000         EPS         
+r2.c2.v1          .              .             1.0000         EPS         
+r2.c2.v2          .              .             1.0000         EPS         
+r2.c2.v3          .              .             1.0000         EPS         
+r2.c2.v4          .              .             1.0000         EPS         
+r2.c2.v5          .              .             1.0000         EPS         
+r2.c2.v6          .             1.0000         1.0000         EPS         
+r2.c3.v1          .             1.0000         1.0000         EPS         
+r2.c3.v2          .              .             1.0000         EPS         
+r2.c3.v3          .              .             1.0000         EPS         
+r2.c3.v4          .              .             1.0000         EPS         
+r2.c3.v5          .              .             1.0000         EPS         
+r2.c3.v6          .              .             1.0000         EPS         
+r2.c4.v1          .              .             1.0000         EPS         
+r2.c4.v2          .              .             1.0000         EPS         
+r2.c4.v3          .              .             1.0000         EPS         
+r2.c4.v4          .              .             1.0000         EPS         
+r2.c4.v5          .             1.0000         1.0000         EPS         
+r2.c4.v6          .              .             1.0000         EPS         
+r2.c5.v1          .              .             1.0000         EPS         
+r2.c5.v2          .              .             1.0000         EPS         
+r2.c5.v3          .              .             1.0000         EPS         
+r2.c5.v4          .             1.0000         1.0000         EPS         
+r2.c5.v5          .              .             1.0000         EPS         
+r2.c5.v6          .              .             1.0000         EPS         
+r2.c6.v1          .              .             1.0000         EPS         
+r2.c6.v2          .              .             1.0000         EPS         
+r2.c6.v3          .             1.0000         1.0000         EPS         
+r2.c6.v4          .              .             1.0000         EPS         
+r2.c6.v5          .              .             1.0000         EPS         
+r2.c6.v6          .              .             1.0000         EPS         
+r3.c1.v1          .              .             1.0000         EPS         
+r3.c1.v2          .              .             1.0000         EPS         
+r3.c1.v3          .             1.0000         1.0000         EPS         
+r3.c1.v4          .              .             1.0000         EPS         
+r3.c1.v5          .              .             1.0000         EPS         
+r3.c1.v6          .              .             1.0000         EPS         
+r3.c2.v1          .              .             1.0000         EPS         
+r3.c2.v2          .              .             1.0000         EPS         
+r3.c2.v3          .              .             1.0000         EPS         
+r3.c2.v4          .             1.0000         1.0000         EPS         
+r3.c2.v5          .              .             1.0000         EPS         
+r3.c2.v6          .              .             1.0000         EPS         
+r3.c3.v1          .              .             1.0000         EPS         
+r3.c3.v2          .              .             1.0000         EPS         
+r3.c3.v3          .              .             1.0000         EPS         
+r3.c3.v4          .              .             1.0000         EPS         
+r3.c3.v5          .              .             1.0000         EPS         
+r3.c3.v6          .             1.0000         1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 19
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+     VAR x  x[r,c,v] = 1 means cell [r,c] is assigned value v
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+r3.c4.v1          .              .             1.0000         EPS         
+r3.c4.v2          .             1.0000         1.0000         EPS         
+r3.c4.v3          .              .             1.0000         EPS         
+r3.c4.v4          .              .             1.0000         EPS         
+r3.c4.v5          .              .             1.0000         EPS         
+r3.c4.v6          .              .             1.0000         EPS         
+r3.c5.v1          .             1.0000         1.0000         EPS         
+r3.c5.v2          .              .             1.0000         EPS         
+r3.c5.v3          .              .             1.0000         EPS         
+r3.c5.v4          .              .             1.0000         EPS         
+r3.c5.v5          .              .             1.0000         EPS         
+r3.c5.v6          .              .             1.0000         EPS         
+r3.c6.v1          .              .             1.0000         EPS         
+r3.c6.v2          .              .             1.0000         EPS         
+r3.c6.v3          .              .             1.0000         EPS         
+r3.c6.v4          .              .             1.0000         EPS         
+r3.c6.v5          .             1.0000         1.0000         EPS         
+r3.c6.v6          .              .             1.0000         EPS         
+r4.c1.v1          .              .             1.0000         EPS         
+r4.c1.v2          .              .             1.0000         EPS         
+r4.c1.v3          .              .             1.0000         EPS         
+r4.c1.v4          .              .             1.0000         EPS         
+r4.c1.v5          .             1.0000         1.0000         EPS         
+r4.c1.v6          .              .             1.0000         EPS         
+r4.c2.v1          .              .             1.0000         EPS         
+r4.c2.v2          .              .             1.0000         EPS         
+r4.c2.v3          .             1.0000         1.0000         EPS         
+r4.c2.v4          .              .             1.0000         EPS         
+r4.c2.v5          .              .             1.0000         EPS         
+r4.c2.v6          .              .             1.0000         EPS         
+r4.c3.v1          .              .             1.0000         EPS         
+r4.c3.v2          .             1.0000         1.0000         EPS         
+r4.c3.v3          .              .             1.0000         EPS         
+r4.c3.v4          .              .             1.0000         EPS         
+r4.c3.v5          .              .             1.0000         EPS         
+r4.c3.v6          .              .             1.0000         EPS         
+r4.c4.v1          .             1.0000         1.0000         EPS         
+r4.c4.v2          .              .             1.0000         EPS         
+r4.c4.v3          .              .             1.0000         EPS         
+r4.c4.v4          .              .             1.0000         EPS         
+r4.c4.v5          .              .             1.0000         EPS         
+r4.c4.v6          .              .             1.0000         EPS         
+r4.c5.v1          .              .             1.0000         EPS         
+r4.c5.v2          .              .             1.0000         EPS         
+r4.c5.v3          .              .             1.0000         EPS         
+r4.c5.v4          .              .             1.0000         EPS         
+r4.c5.v5          .              .             1.0000         EPS         
+r4.c5.v6          .             1.0000         1.0000         EPS         
+r4.c6.v1          .              .             1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 20
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+     VAR x  x[r,c,v] = 1 means cell [r,c] is assigned value v
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+r4.c6.v2          .              .             1.0000         EPS         
+r4.c6.v3          .              .             1.0000         EPS         
+r4.c6.v4          .             1.0000         1.0000         EPS         
+r4.c6.v5          .              .             1.0000         EPS         
+r4.c6.v6          .              .             1.0000         EPS         
+r5.c1.v1          .              .             1.0000         EPS         
+r5.c1.v2          .              .             1.0000         EPS         
+r5.c1.v3          .              .             1.0000         EPS         
+r5.c1.v4          .             1.0000         1.0000         EPS         
+r5.c1.v5          .              .             1.0000         EPS         
+r5.c1.v6          .              .             1.0000         EPS         
+r5.c2.v1          .             1.0000         1.0000         EPS         
+r5.c2.v2          .              .             1.0000         EPS         
+r5.c2.v3          .              .             1.0000         EPS         
+r5.c2.v4          .              .             1.0000         EPS         
+r5.c2.v5          .              .             1.0000         EPS         
+r5.c2.v6          .              .             1.0000         EPS         
+r5.c3.v1          .              .             1.0000         EPS         
+r5.c3.v2          .              .             1.0000         EPS         
+r5.c3.v3          .             1.0000         1.0000         EPS         
+r5.c3.v4          .              .             1.0000         EPS         
+r5.c3.v5          .              .             1.0000         EPS         
+r5.c3.v6          .              .             1.0000         EPS         
+r5.c4.v1          .              .             1.0000         EPS         
+r5.c4.v2          .              .             1.0000         EPS         
+r5.c4.v3          .              .             1.0000         EPS         
+r5.c4.v4          .              .             1.0000         EPS         
+r5.c4.v5          .              .             1.0000         EPS         
+r5.c4.v6          .             1.0000         1.0000         EPS         
+r5.c5.v1          .              .             1.0000         EPS         
+r5.c5.v2          .              .             1.0000         EPS         
+r5.c5.v3          .              .             1.0000         EPS         
+r5.c5.v4          .              .             1.0000         EPS         
+r5.c5.v5          .             1.0000         1.0000         EPS         
+r5.c5.v6          .              .             1.0000         EPS         
+r5.c6.v1          .              .             1.0000         EPS         
+r5.c6.v2          .             1.0000         1.0000         EPS         
+r5.c6.v3          .              .             1.0000         EPS         
+r5.c6.v4          .              .             1.0000         EPS         
+r5.c6.v5          .              .             1.0000         EPS         
+r5.c6.v6          .              .             1.0000         EPS         
+r6.c1.v1          .             1.0000         1.0000         EPS         
+r6.c1.v2          .              .             1.0000         EPS         
+r6.c1.v3          .              .             1.0000         EPS         
+r6.c1.v4          .              .             1.0000         EPS         
+r6.c1.v5          .              .             1.0000         EPS         
+r6.c1.v6          .              .             1.0000         EPS         
+r6.c2.v1          .              .             1.0000         EPS         
+r6.c2.v2          .              .             1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 21
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+     VAR x  x[r,c,v] = 1 means cell [r,c] is assigned value v
+
+                LOWER          LEVEL          UPPER         MARGINAL
+
+r6.c2.v3          .              .             1.0000         EPS         
+r6.c2.v4          .              .             1.0000         EPS         
+r6.c2.v5          .             1.0000         1.0000         EPS         
+r6.c2.v6          .              .             1.0000         EPS         
+r6.c3.v1          .              .             1.0000         EPS         
+r6.c3.v2          .              .             1.0000         EPS         
+r6.c3.v3          .              .             1.0000         EPS         
+r6.c3.v4          .             1.0000         1.0000         EPS         
+r6.c3.v5          .              .             1.0000         EPS         
+r6.c3.v6          .              .             1.0000         EPS         
+r6.c4.v1          .              .             1.0000         EPS         
+r6.c4.v2          .              .             1.0000         EPS         
+r6.c4.v3          .             1.0000         1.0000         EPS         
+r6.c4.v4          .              .             1.0000         EPS         
+r6.c4.v5          .              .             1.0000         EPS         
+r6.c4.v6          .              .             1.0000         EPS         
+r6.c5.v1          .              .             1.0000         EPS         
+r6.c5.v2          .             1.0000         1.0000         EPS         
+r6.c5.v3          .              .             1.0000         EPS         
+r6.c5.v4          .              .             1.0000         EPS         
+r6.c5.v5          .              .             1.0000         EPS         
+r6.c5.v6          .              .             1.0000         EPS         
+r6.c6.v1          .              .             1.0000         EPS         
+r6.c6.v2          .              .             1.0000         EPS         
+r6.c6.v3          .              .             1.0000         EPS         
+r6.c6.v4          .              .             1.0000         EPS         
+r6.c6.v5          .              .             1.0000         EPS         
+r6.c6.v6          .             1.0000         1.0000         EPS         
+
+---- VAR valincell  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+r1.c1        -INF            6.0000        +INF             .          
+r1.c2        -INF            2.0000        +INF             .          
+r1.c3        -INF            5.0000        +INF             .          
+r1.c4        -INF            4.0000        +INF             .          
+r1.c5        -INF            3.0000        +INF             .          
+r1.c6        -INF            1.0000        +INF             .          
+r2.c1        -INF            2.0000        +INF             .          
+r2.c2        -INF            6.0000        +INF             .          
+r2.c3        -INF            1.0000        +INF             .          
+r2.c4        -INF            5.0000        +INF             .          
+r2.c5        -INF            4.0000        +INF             .          
+r2.c6        -INF            3.0000        +INF             .          
+r3.c1        -INF            3.0000        +INF             .          
+r3.c2        -INF            4.0000        +INF             .          
+r3.c3        -INF            6.0000        +INF             .          
+r3.c4        -INF            2.0000        +INF             .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 22
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE kenkensolver Using MIP From line 89
+
+
+     VAR valincell  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+r3.c5        -INF            1.0000        +INF             .          
+r3.c6        -INF            5.0000        +INF             .          
+r4.c1        -INF            5.0000        +INF             .          
+r4.c2        -INF            3.0000        +INF             .          
+r4.c3        -INF            2.0000        +INF             .          
+r4.c4        -INF            1.0000        +INF             .          
+r4.c5        -INF            6.0000        +INF             .          
+r4.c6        -INF            4.0000        +INF             .          
+r5.c1        -INF            4.0000        +INF             .          
+r5.c2        -INF            1.0000        +INF             .          
+r5.c3        -INF            3.0000        +INF             .          
+r5.c4        -INF            6.0000        +INF             .          
+r5.c5        -INF            5.0000        +INF             .          
+r5.c6        -INF            2.0000        +INF             .          
+r6.c1        -INF            1.0000        +INF             .          
+r6.c2        -INF            5.0000        +INF             .          
+r6.c3        -INF            4.0000        +INF             .          
+r6.c4        -INF            3.0000        +INF             .          
+r6.c5        -INF            2.0000        +INF             .          
+r6.c6        -INF            6.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR objective         -INF            1.0000        +INF             .          
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/14/16 21:52:17 Page 23
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+----     91 VARIABLE valincell.L  
+
+            c1          c2          c3          c4          c5          c6
+
+r1       6.000       2.000       5.000       4.000       3.000       1.000
+r2       2.000       6.000       1.000       5.000       4.000       3.000
+r3       3.000       4.000       6.000       2.000       1.000       5.000
+r4       5.000       3.000       2.000       1.000       6.000       4.000
+r5       4.000       1.000       3.000       6.000       5.000       2.000
+r6       1.000       5.000       4.000       3.000       2.000       6.000
+
+
+----    100 PARAMETER results  
+
+            c1          c2          c3          c4          c5          c6
+
+r1       6.000       2.000       5.000       4.000       3.000       1.000
+r2       2.000       6.000       1.000       5.000       4.000       3.000
+r3       3.000       4.000       6.000       2.000       1.000       5.000
+r4       5.000       3.000       2.000       1.000       6.000       4.000
+r5       4.000       1.000       3.000       6.000       5.000       2.000
+r6       1.000       5.000       4.000       3.000       2.000       6.000
+
+
+
+EXECUTION TIME       =        0.004 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
 
 
 USER: CS 524 Course License                          G160914/0001AS-GEN

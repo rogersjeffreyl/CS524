@@ -13,28 +13,30 @@ Set s   segments       / s0*s3 /
     sl  segment labels / x, y coordinates, l length, g slope /;
 
 Table logp(s,sl) piecewise linear function for sqrt
-      x		y 				l                                                g
-s0    0		0 				[sqrt(sqr(log(6)-0)+sqr(5))]                 [log( 6)/5]		
-s1    5		[log(6)] 		[sqrt(sqr(log(11)-log( 6))+sqr(5))]          [(log(11)-log( 6))/5]	
-s2    10	[log(11)] 		[sqrt(sqr(log(101)-log( 11))+sqr(90))]       [(log(101)-log( 11))/90]		
-s3    100	[log(101)] 		+INF                                         [1/101] ;
+      x		y           l    g
+s0    0		0           5    [log( 6)/5]		                							 
+s1    5		[log(6)]    5    [(log(11)-log( 6))/5]
+s2    10	[log(11)]   90   [(log(101)-log(11))/90]
+s3    100	[log(101)]  +INF [1/101] ;                                   
 
 positive variable q(i,j,k) "quantity of item carried through link i,j";
 positive variable flow(i,j);
-free variable PWcost;
+free variable PWcost "total cost of the flow";
 
 equations
-	link_capacity_eq(i,j),
-	piecewise_obj,
-	flow_eq,
-	flow_equality_eqn(i,j),
-	demand_supply_equation(i,k);
+	link_capacity_eq(i,j) "Flow through a link should not exceed the capacity",
+	piecewise_obj "Objectie to minimize the cost",
+	flow_eq "Assigning flows from pwlfunc.inc",
+	flow_equality_eqn(i,j) "equating the flow from piecewise and the q flows",
+	demand_supply_equation(i,k) "demand at each node should be met for each product";
+	
 link_capacity_eq(i,j)$arcs(i,j)..
 	sum(k,q(i,j,k)) =l= capacity(i,j);
 demand_supply_equation(i,k)..
-	sum(j$arcs(i,j),q(i,j,k)) -sum(j$(arcs(j,i)),q(j,i,k)) =e=demand(i,k);
+	sum(j$arcs(i,j),q(i,j,k)) -sum(j$(arcs(j,i)),q(j,i,k)) =e=-demand(i,k);
 
 $batinclude pwlfunc.inc logp s x y l g '' 'i,j'
+
 piecewise_obj..
     PWcost =e= sum((i,j)$arcs(i,j), logp_y(i,j));
 
@@ -45,4 +47,5 @@ flow_equality_eqn(i,j)$arcs(i,j)..
 	flow(i,j) =e=sum(k,q(i,j,k));
 
 model piecewise_networks /all/;
+piecewise_networks.optcr = .02;
 solve piecewise_networks minimizing  PWcost using mip;

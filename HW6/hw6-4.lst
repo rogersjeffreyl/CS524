@@ -1,4 +1,4 @@
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/12/16 22:19:09 Page 1
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/15/16 22:17:16 Page 1
 Lights Out
 C o m p i l a t i o n
 
@@ -12,8 +12,8 @@ C o m p i l a t i o n
    8   
    9  free variable num_turns;
   10  equations
-  11          objective_eq,
-  12      light_state_toggle_eqn(i,j);
+  11          objective_eq "objective to minimize the number of turns",
+  12      light_state_toggle_eqn(i,j) "toggling the light state based on initial state";
   13   
   14  objective_eq..
   15          num_turns =e= sum((i,j),switch_clicked(i,j));
@@ -29,12 +29,12 @@ C o m p i l a t i o n
   25   
   26   
   27  equations
-  28          light_state_toggle_eqn_1(i,j);
+  28          light_state_toggle_eqn_1(i,j) "Equation for toggling the light status depending on the initial state";
   29   
   30   
   31  switch_clicked.L(i,j)=0;
   32   
-  33  scalar init /3/;
+  33  scalar init  "scalar indicating the initial state 0-off 1-low 2-mid 3-high" /3/;
   34  light_state_toggle_eqn_1(i,j)..
   35          switch_clicked(i-1,j)+switch_clicked(i,j-1)+switch_clicked(i,j)+switch_clicked(i,j+1)+switch_clicked(i+1,j)+init =e= 4*light_status(i,j);
   36   
@@ -51,12 +51,12 @@ C o m p i l a t i o n
 
 
 COMPILATION TIME     =        0.000 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/12/16 22:19:09 Page 2
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/15/16 22:17:16 Page 2
 Lights Out
 Equation Listing    SOLVE lights_out Using MIP From line 22
 
 
----- light_state_toggle_eqn  =E=  
+---- light_state_toggle_eqn  =E=  toggling the light state based on initial state
 
 light_state_toggle_eqn(1,1)..  - 2*light_status(1,1) + switch_clicked(1,1) + switch_clicked(1,2) + switch_clicked(2,1) =E= -1 ; (LHS = 0, INFES = 1 ****)
      
@@ -67,7 +67,7 @@ light_state_toggle_eqn(1,3)..  - 2*light_status(1,3) + switch_clicked(1,2) + swi
 REMAINING 22 ENTRIES SKIPPED
 
 
----- objective_eq  =E=  
+---- objective_eq  =E=  objective to minimize the number of turns
 
 objective_eq..  - switch_clicked(1,1) - switch_clicked(1,2) - switch_clicked(1,3) - switch_clicked(1,4) - switch_clicked(1,5) - switch_clicked(2,1) - switch_clicked(2,2) - switch_clicked(2,3) - switch_clicked(2,4) - switch_clicked(2,5)
      
@@ -75,7 +75,7 @@ objective_eq..  - switch_clicked(1,1) - switch_clicked(1,2) - switch_clicked(1,3
      
       - switch_clicked(5,2) - switch_clicked(5,3) - switch_clicked(5,4) - switch_clicked(5,5) + num_turns =E= 0 ; (LHS = 0)
      
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/12/16 22:19:09 Page 3
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/15/16 22:17:16 Page 3
 Lights Out
 Column Listing      SOLVE lights_out Using MIP From line 22
 
@@ -133,7 +133,7 @@ num_turns
 ****
 ****  50 Integer +INF Bounds have been reset to 100 (see Option IntVarUp)
 ****
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/12/16 22:19:09 Page 4
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/15/16 22:17:16 Page 4
 Lights Out
 Model Statistics    SOLVE lights_out Using MIP From line 22
 
@@ -145,11 +145,11 @@ BLOCKS OF VARIABLES           3     SINGLE VARIABLES           51
 NON ZERO ELEMENTS           156     DISCRETE VARIABLES         50
 
 
-GENERATION TIME      =        0.004 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+GENERATION TIME      =        0.005 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
 
 
-EXECUTION TIME       =        0.004 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/12/16 22:19:09 Page 5
+EXECUTION TIME       =        0.005 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/15/16 22:17:16 Page 5
 Lights Out
 Solution Report     SOLVE lights_out Using MIP From line 22
 
@@ -164,7 +164,7 @@ Solution Report     SOLVE lights_out Using MIP From line 22
 **** MODEL STATUS      8 Integer Solution          
 **** OBJECTIVE VALUE               15.0000
 
- RESOURCE USAGE, LIMIT          0.026      1000.000
+ RESOURCE USAGE, LIMIT          0.024      1000.000
  ITERATION COUNT, LIMIT       426    2000000000
 
 IBM ILOG CPLEX   24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
@@ -187,7 +187,7 @@ Absolute gap:            1.500000
 Relative gap:            0.100000
 
 
----- EQU light_state_toggle_eqn  
+---- EQU light_state_toggle_eqn  toggling the light state based on initial state
 
            LOWER          LEVEL          UPPER         MARGINAL
 
@@ -207,12 +207,12 @@ Relative gap:            0.100000
 3.4        -1.0000        -1.0000        -1.0000          .          
 3.5        -1.0000        -1.0000        -1.0000          .          
 4.1        -1.0000        -1.0000        -1.0000          .          
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/12/16 22:19:09 Page 6
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/15/16 22:17:16 Page 6
 Lights Out
 Solution Report     SOLVE lights_out Using MIP From line 22
 
 
-     EQU light_state_toggle_eqn  
+     EQU light_state_toggle_eqn  toggling the light state based on initial state
 
            LOWER          LEVEL          UPPER         MARGINAL
 
@@ -229,6 +229,8 @@ Solution Report     SOLVE lights_out Using MIP From line 22
                            LOWER          LEVEL          UPPER         MARGINAL
 
 ---- EQU objective~          .              .              .             1.0000      
+
+  objective_eq  objective to minimize the number of turns
 
 ---- VAR light_status  light status = 0 implies light is off
 
@@ -259,7 +261,7 @@ Solution Report     SOLVE lights_out Using MIP From line 22
 5.3          .             2.0000       100.0000         EPS         
 5.4          .             2.0000       100.0000         EPS         
 5.5          .             1.0000       100.0000         EPS         
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/12/16 22:19:09 Page 7
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/15/16 22:17:16 Page 7
 Lights Out
 Solution Report     SOLVE lights_out Using MIP From line 22
 
@@ -302,7 +304,7 @@ Solution Report     SOLVE lights_out Using MIP From line 22
 **** REPORT SUMMARY :        0     NONOPT
                              0 INFEASIBLE
                              0  UNBOUNDED
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/12/16 22:19:09 Page 8
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/15/16 22:17:16 Page 8
 Lights Out
 E x e c u t i o n
 
@@ -317,12 +319,12 @@ E x e c u t i o n
 4       2.000       2.000       3.000       2.000       1.000
 5       1.000       2.000       2.000       2.000       1.000
 
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/12/16 22:19:09 Page 9
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/15/16 22:17:16 Page 9
 Lights Out
 Equation Listing    SOLVE lights_out_3 Using MIP From line 38
 
 
----- light_state_toggle_eqn_1  =E=  
+---- light_state_toggle_eqn_1  =E=  Equation for toggling the light status depending on the initial state
 
 light_state_toggle_eqn_1(1,1)..  - 4*light_status(1,1) + switch_clicked(1,1) + switch_clicked(1,2) + switch_clicked(2,1) =E= -3 ; (LHS = -4, INFES = 1 ****)
      
@@ -333,7 +335,7 @@ light_state_toggle_eqn_1(1,3)..  - 4*light_status(1,3) + switch_clicked(1,2) + s
 REMAINING 22 ENTRIES SKIPPED
 
 
----- objective_eq  =E=  
+---- objective_eq  =E=  objective to minimize the number of turns
 
 objective_eq..  - switch_clicked(1,1) - switch_clicked(1,2) - switch_clicked(1,3) - switch_clicked(1,4) - switch_clicked(1,5) - switch_clicked(2,1) - switch_clicked(2,2) - switch_clicked(2,3) - switch_clicked(2,4) - switch_clicked(2,5)
      
@@ -341,7 +343,7 @@ objective_eq..  - switch_clicked(1,1) - switch_clicked(1,2) - switch_clicked(1,3
      
       - switch_clicked(5,2) - switch_clicked(5,3) - switch_clicked(5,4) - switch_clicked(5,5) + num_turns =E= 0 ; (LHS = 15, INFES = 15 ****)
      
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 10
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 10
 Lights Out
 Column Listing      SOLVE lights_out_3 Using MIP From line 38
 
@@ -399,7 +401,7 @@ num_turns
 ****
 ****  50 Integer +INF Bounds have been reset to 100 (see Option IntVarUp)
 ****
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 11
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 11
 Lights Out
 Model Statistics    SOLVE lights_out_3 Using MIP From line 38
 
@@ -411,11 +413,11 @@ BLOCKS OF VARIABLES           3     SINGLE VARIABLES           51
 NON ZERO ELEMENTS           156     DISCRETE VARIABLES         50
 
 
-GENERATION TIME      =        0.004 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GENERATION TIME      =        0.003 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
 
 
 EXECUTION TIME       =        0.005 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 12
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 12
 Lights Out
 Solution Report     SOLVE lights_out_3 Using MIP From line 38
 
@@ -430,7 +432,7 @@ Solution Report     SOLVE lights_out_3 Using MIP From line 38
 **** MODEL STATUS      8 Integer Solution          
 **** OBJECTIVE VALUE               39.0000
 
- RESOURCE USAGE, LIMIT          0.422      1000.000
+ RESOURCE USAGE, LIMIT          0.430      1000.000
  ITERATION COUNT, LIMIT     12498    2000000000
 
 IBM ILOG CPLEX   24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
@@ -439,7 +441,7 @@ Cplex 12.6.3.0
 Space for names approximately 0.00 Mb
 Use option 'names no' to turn use of names off
 MIP status(102): integer optimal, tolerance
-Cplex Time: 0.42sec (det. 379.11 ticks)
+Cplex Time: 0.43sec (det. 379.11 ticks)
 Fixing integer variables, and solving final LP...
 Fixed MIP status(1): optimal
 Cplex Time: 0.00sec (det. 0.02 ticks)
@@ -453,7 +455,7 @@ Absolute gap:            2.782609
 Relative gap:            0.071349
 
 
----- EQU light_state_toggle_eqn_1  
+---- EQU light_state_toggle_eqn_1  Equation for toggling the light status depending on the initial state
 
            LOWER          LEVEL          UPPER         MARGINAL
 
@@ -473,12 +475,12 @@ Relative gap:            0.071349
 3.4        -3.0000        -3.0000        -3.0000          .          
 3.5        -3.0000        -3.0000        -3.0000          .          
 4.1        -3.0000        -3.0000        -3.0000          .          
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 13
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 13
 Lights Out
 Solution Report     SOLVE lights_out_3 Using MIP From line 38
 
 
-     EQU light_state_toggle_eqn_1  
+     EQU light_state_toggle_eqn_1  Equation for toggling the light status depending on the initial state
 
            LOWER          LEVEL          UPPER         MARGINAL
 
@@ -495,6 +497,8 @@ Solution Report     SOLVE lights_out_3 Using MIP From line 38
                            LOWER          LEVEL          UPPER         MARGINAL
 
 ---- EQU objective~          .              .              .             1.0000      
+
+  objective_eq  objective to minimize the number of turns
 
 ---- VAR light_status  light status = 0 implies light is off
 
@@ -525,7 +529,7 @@ Solution Report     SOLVE lights_out_3 Using MIP From line 38
 5.3          .             2.0000       100.0000         EPS         
 5.4          .             2.0000       100.0000         EPS         
 5.5          .             1.0000       100.0000         EPS         
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 14
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 14
 Lights Out
 Solution Report     SOLVE lights_out_3 Using MIP From line 38
 
@@ -568,12 +572,12 @@ Solution Report     SOLVE lights_out_3 Using MIP From line 38
 **** REPORT SUMMARY :        0     NONOPT
                              0 INFEASIBLE
                              0  UNBOUNDED
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 15
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 15
 Lights Out
 Equation Listing    SOLVE lights_out_2 Using MIP From line 42
 
 
----- light_state_toggle_eqn_1  =E=  
+---- light_state_toggle_eqn_1  =E=  Equation for toggling the light status depending on the initial state
 
 light_state_toggle_eqn_1(1,1)..  - 4*light_status(1,1) + switch_clicked(1,1) + switch_clicked(1,2) + switch_clicked(2,1) =E= -2 ; (LHS = -3, INFES = 1 ****)
      
@@ -584,7 +588,7 @@ light_state_toggle_eqn_1(1,3)..  - 4*light_status(1,3) + switch_clicked(1,2) + s
 REMAINING 22 ENTRIES SKIPPED
 
 
----- objective_eq  =E=  
+---- objective_eq  =E=  objective to minimize the number of turns
 
 objective_eq..  - switch_clicked(1,1) - switch_clicked(1,2) - switch_clicked(1,3) - switch_clicked(1,4) - switch_clicked(1,5) - switch_clicked(2,1) - switch_clicked(2,2) - switch_clicked(2,3) - switch_clicked(2,4) - switch_clicked(2,5)
      
@@ -592,7 +596,7 @@ objective_eq..  - switch_clicked(1,1) - switch_clicked(1,2) - switch_clicked(1,3
      
       - switch_clicked(5,2) - switch_clicked(5,3) - switch_clicked(5,4) - switch_clicked(5,5) + num_turns =E= 0 ; (LHS = 0)
      
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 16
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 16
 Lights Out
 Column Listing      SOLVE lights_out_2 Using MIP From line 42
 
@@ -650,7 +654,7 @@ num_turns
 ****
 ****  50 Integer +INF Bounds have been reset to 100 (see Option IntVarUp)
 ****
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 17
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 17
 Lights Out
 Model Statistics    SOLVE lights_out_2 Using MIP From line 42
 
@@ -662,11 +666,11 @@ BLOCKS OF VARIABLES           3     SINGLE VARIABLES           51
 NON ZERO ELEMENTS           156     DISCRETE VARIABLES         50
 
 
-GENERATION TIME      =        0.004 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GENERATION TIME      =        0.003 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
 
 
-EXECUTION TIME       =        0.005 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 18
+EXECUTION TIME       =        0.004 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 18
 Lights Out
 Solution Report     SOLVE lights_out_2 Using MIP From line 42
 
@@ -681,7 +685,7 @@ Solution Report     SOLVE lights_out_2 Using MIP From line 42
 **** MODEL STATUS      8 Integer Solution          
 **** OBJECTIVE VALUE               30.0000
 
- RESOURCE USAGE, LIMIT         10.035      1000.000
+ RESOURCE USAGE, LIMIT          9.943      1000.000
  ITERATION COUNT, LIMIT    629622    2000000000
 
 IBM ILOG CPLEX   24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
@@ -690,7 +694,7 @@ Cplex 12.6.3.0
 Space for names approximately 0.00 Mb
 Use option 'names no' to turn use of names off
 MIP status(102): integer optimal, tolerance
-Cplex Time: 10.03sec (det. 7626.82 ticks)
+Cplex Time: 9.94sec (det. 7626.82 ticks)
 Fixing integer variables, and solving final LP...
 Fixed MIP status(1): optimal
 Cplex Time: 0.00sec (det. 0.02 ticks)
@@ -704,7 +708,7 @@ Absolute gap:            3.000000
 Relative gap:            0.100000
 
 
----- EQU light_state_toggle_eqn_1  
+---- EQU light_state_toggle_eqn_1  Equation for toggling the light status depending on the initial state
 
            LOWER          LEVEL          UPPER         MARGINAL
 
@@ -724,12 +728,12 @@ Relative gap:            0.100000
 3.4        -2.0000        -2.0000        -2.0000          .          
 3.5        -2.0000        -2.0000        -2.0000          .          
 4.1        -2.0000        -2.0000        -2.0000          .          
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 19
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 19
 Lights Out
 Solution Report     SOLVE lights_out_2 Using MIP From line 42
 
 
-     EQU light_state_toggle_eqn_1  
+     EQU light_state_toggle_eqn_1  Equation for toggling the light status depending on the initial state
 
            LOWER          LEVEL          UPPER         MARGINAL
 
@@ -746,6 +750,8 @@ Solution Report     SOLVE lights_out_2 Using MIP From line 42
                            LOWER          LEVEL          UPPER         MARGINAL
 
 ---- EQU objective~          .              .              .             1.0000      
+
+  objective_eq  objective to minimize the number of turns
 
 ---- VAR light_status  light status = 0 implies light is off
 
@@ -776,7 +782,7 @@ Solution Report     SOLVE lights_out_2 Using MIP From line 42
 5.3          .             1.0000       100.0000         EPS         
 5.4          .             1.0000       100.0000         EPS         
 5.5          .             1.0000       100.0000         EPS         
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 20
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 20
 Lights Out
 Solution Report     SOLVE lights_out_2 Using MIP From line 42
 
@@ -819,12 +825,12 @@ Solution Report     SOLVE lights_out_2 Using MIP From line 42
 **** REPORT SUMMARY :        0     NONOPT
                              0 INFEASIBLE
                              0  UNBOUNDED
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 21
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 21
 Lights Out
 Equation Listing    SOLVE lights_out_1 Using MIP From line 46
 
 
----- light_state_toggle_eqn_1  =E=  
+---- light_state_toggle_eqn_1  =E=  Equation for toggling the light status depending on the initial state
 
 light_state_toggle_eqn_1(1,1)..  - 4*light_status(1,1) + switch_clicked(1,1) + switch_clicked(1,2) + switch_clicked(2,1) =E= -1 ; (LHS = -2, INFES = 1 ****)
      
@@ -835,7 +841,7 @@ light_state_toggle_eqn_1(1,3)..  - 4*light_status(1,3) + switch_clicked(1,2) + s
 REMAINING 22 ENTRIES SKIPPED
 
 
----- objective_eq  =E=  
+---- objective_eq  =E=  objective to minimize the number of turns
 
 objective_eq..  - switch_clicked(1,1) - switch_clicked(1,2) - switch_clicked(1,3) - switch_clicked(1,4) - switch_clicked(1,5) - switch_clicked(2,1) - switch_clicked(2,2) - switch_clicked(2,3) - switch_clicked(2,4) - switch_clicked(2,5)
      
@@ -843,7 +849,7 @@ objective_eq..  - switch_clicked(1,1) - switch_clicked(1,2) - switch_clicked(1,3
      
       - switch_clicked(5,2) - switch_clicked(5,3) - switch_clicked(5,4) - switch_clicked(5,5) + num_turns =E= 0 ; (LHS = 0)
      
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 22
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 22
 Lights Out
 Column Listing      SOLVE lights_out_1 Using MIP From line 46
 
@@ -901,7 +907,7 @@ num_turns
 ****
 ****  50 Integer +INF Bounds have been reset to 100 (see Option IntVarUp)
 ****
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 23
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 23
 Lights Out
 Model Statistics    SOLVE lights_out_1 Using MIP From line 46
 
@@ -913,11 +919,11 @@ BLOCKS OF VARIABLES           3     SINGLE VARIABLES           51
 NON ZERO ELEMENTS           156     DISCRETE VARIABLES         50
 
 
-GENERATION TIME      =        0.003 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GENERATION TIME      =        0.004 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
 
 
-EXECUTION TIME       =        0.005 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 24
+EXECUTION TIME       =        0.007 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 24
 Lights Out
 Solution Report     SOLVE lights_out_1 Using MIP From line 46
 
@@ -932,7 +938,7 @@ Solution Report     SOLVE lights_out_1 Using MIP From line 46
 **** MODEL STATUS      8 Integer Solution          
 **** OBJECTIVE VALUE               29.0000
 
- RESOURCE USAGE, LIMIT          0.053      1000.000
+ RESOURCE USAGE, LIMIT          0.052      1000.000
  ITERATION COUNT, LIMIT      1947    2000000000
 
 IBM ILOG CPLEX   24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
@@ -955,7 +961,7 @@ Absolute gap:            2.837838
 Relative gap:            0.097856
 
 
----- EQU light_state_toggle_eqn_1  
+---- EQU light_state_toggle_eqn_1  Equation for toggling the light status depending on the initial state
 
            LOWER          LEVEL          UPPER         MARGINAL
 
@@ -975,12 +981,12 @@ Relative gap:            0.097856
 3.4        -1.0000        -1.0000        -1.0000          .          
 3.5        -1.0000        -1.0000        -1.0000          .          
 4.1        -1.0000        -1.0000        -1.0000          .          
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 25
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 25
 Lights Out
 Solution Report     SOLVE lights_out_1 Using MIP From line 46
 
 
-     EQU light_state_toggle_eqn_1  
+     EQU light_state_toggle_eqn_1  Equation for toggling the light status depending on the initial state
 
            LOWER          LEVEL          UPPER         MARGINAL
 
@@ -997,6 +1003,8 @@ Solution Report     SOLVE lights_out_1 Using MIP From line 46
                            LOWER          LEVEL          UPPER         MARGINAL
 
 ---- EQU objective~          .              .              .             1.0000      
+
+  objective_eq  objective to minimize the number of turns
 
 ---- VAR light_status  light status = 0 implies light is off
 
@@ -1027,7 +1035,7 @@ Solution Report     SOLVE lights_out_1 Using MIP From line 46
 5.3          .             1.0000       100.0000         EPS         
 5.4          .             1.0000       100.0000         EPS         
 5.5          .             1.0000       100.0000         EPS         
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/12/16 22:19:09 Page 26
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/15/16 22:17:16 Page 26
 Lights Out
 Solution Report     SOLVE lights_out_1 Using MIP From line 46
 

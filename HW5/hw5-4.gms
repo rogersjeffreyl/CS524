@@ -27,17 +27,19 @@ free variable total_cost;
 equations
   total_cost_eq,
   operational_plants_stay_same(plant,year),
-  construction_eq(plant,year),
+  construction_eq(plant),
   capacity_eq(year);
 total_cost_eq..
   total_cost =e= sum ((plant,year),z(plant,year)*data(plant,'opCost')) + sum(plant, const(plant)*data(plant,'cCost'));
 capacity_eq(year)..
   sum((plant), z(plant,year)*data(plant,'genCap')) =g= reqCap(year);
-construction_eq(plant,year)..
-  const(plant) =g= z(plant,year) ;
+construction_eq(plant)..
+  5*const(plant) =g= sum(year,z(plant,year)) ;
 operational_plants_stay_same(plant,year)..
-  z(plant,year-1) =l= 5*z(plant, year);
+  z(plant,year-1) =l= z(plant, year);
+
 model gen_capacity_1 /total_cost_eq, construction_eq,operational_plants_stay_same, capacity_eq/;
+option optcr = 0;
 solve  gen_capacity_1 using mip minimizing total_cost;
 set action /reopen,shutdown/;
 table costs(plant,action) in Million $

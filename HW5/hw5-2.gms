@@ -172,3 +172,6 @@ display t.L;
 parameter time_critical_20(I,J);
 time_critical_20(I,J) = t.L(I,J)$(critical_20(I,J));
 display time_critical_20;
+$ontext
+The critical activities do not change between project durations 20 and 25.
+$offtext
