@@ -97,7 +97,6 @@ loop(boxops(b,o),
        valincell.l(r,c)$add(o)
        + valincell.l(r,c)$mult(o);
    );
-display results;
 
 
   

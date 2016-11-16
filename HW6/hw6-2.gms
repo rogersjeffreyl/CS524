@@ -49,3 +49,4 @@ flow_equality_eqn(i,j)$arcs(i,j)..
 model piecewise_networks /all/;
 piecewise_networks.optcr = .02;
 solve piecewise_networks minimizing  PWcost using mip;
+
