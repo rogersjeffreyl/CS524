@@ -1,3 +1,6 @@
+$title Piecewise Linear Networks
+$ontext
+$offtext
 option seed=0; set nodes /1*500/;
 parameter offset(nodes); offset(nodes) = round(uniform(2,5));
 alias (i,j,l,nodes); set arcs(nodes,nodes);
@@ -13,11 +16,16 @@ Set s   segments       / s0*s3 /
     sl  segment labels / x, y coordinates, l length, g slope /;
 
 Table logp(s,sl) piecewise linear function for sqrt
-      x		y           l    g
-s0    0		0           5    [log( 6)/5]		                							 
-s1    5		[log(6)]    5    [(log(11)-log( 6))/5]
-s2    10	[log(11)]   90   [(log(101)-log(11))/90]
-s3    100	[log(101)]  +INF [1/101] ;                                   
+      x		y             l     g
+s0    0		0             5    [log( 6)/5]		                							 
+s1    5		[log(6)]      5    [(log(11)-log( 6))/5]
+s2    10	[log(11)]     90   [(log(101)-log(11))/90]
+s3    100	[log(101)]    +INF [1/101] ; 
+
+$ontext
+Have solved this piwcewise model using the natural logarithm. 
+Replacing log with log10 gives an objective 212.214
+$offtext                                  
 
 positive variable q(i,j,k) "quantity of item carried through link i,j";
 positive variable flow(i,j);
