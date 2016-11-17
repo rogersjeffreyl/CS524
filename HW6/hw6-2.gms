@@ -17,14 +17,14 @@ Set s   segments       / s0*s3 /
 
 Table logp(s,sl) piecewise linear function for sqrt
       x		y             l     g
-s0    0		0             5    [log( 6)/5]		                							 
-s1    5		[log(6)]      5    [(log(11)-log( 6))/5]
-s2    10	[log(11)]     90   [(log(101)-log(11))/90]
-s3    100	[log(101)]    +INF [1/101] ; 
+s0    0		0             5    [log10( 6)/5]		                							 
+s1    5		[log10(6)]    5    [(log10(11)-log10( 6))/5]
+s2    10	[log10(11)]   90   [(log10(101)-log10(11))/90]
+s3    100	[log10(101)]  +INF [1/101] ; 
 
 $ontext
-Have solved this piwcewise model using the natural logarithm. 
-Replacing log with log10 gives an objective 212.214
+Have solved this piwcewise model using log 10. 
+Replacing log10 with log gives an objective 487.883563
 $offtext                                  
 
 positive variable q(i,j,k) "quantity of item carried through link i,j";
@@ -57,4 +57,16 @@ flow_equality_eqn(i,j)$arcs(i,j)..
 model piecewise_networks /all/;
 piecewise_networks.optcr = .02;
 solve piecewise_networks minimizing  PWcost using mip;
+display PWcost.up;
+display PWcost.l;
+display PWcost.lo;
+
+parameter diff;
+parameter upper, lower;
+diff = abs(piecewise_networks.objest - piecewise_networks.objval);
+lower = piecewise_networks.objval - diff;
+upper = piecewise_networks.objval + diff;
+
+display upper, lower;
+
 
