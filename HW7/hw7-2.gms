@@ -14,12 +14,15 @@ set inputs /1/;
 alias (states,n); alias (inputs,m);
 
 parameter
-        Q(states, states)       Hessian wrt states
+*       Q(states, states)       Hessian wrt states
         R(inputs, inputs)       Hessian wrt inputs
         A(states, states)       state transition matrix in continuous formulation
         B(states, inputs)       input transition matrix in continuous formulation
         Xinitial(states)        initial X
-           /1  0.4, 2  0.2 3 0.0 4 0.0/
+           /1  0.4, 
+            2  0.0,
+            3  0.2, 
+            4  0.0 /
 ;
 
 scalar Ubound /%U%/
@@ -34,22 +37,24 @@ variable
          u(stages, inputs)   input variables (controls)
          cost                   objective function
 ;
-
+$ontext
 table Q
      1     2
 1   2.0   0.0
 2   0.0   1.0;
-
+$offtext
+$ontext
 table R
      1
 1   6.0;
+$offtext
 
 table A
     1    2   3    4
 1  0.0  1.0  0    0 
 2  10   0.0  -12  0
 3  0    0.0  0    1
-4 -10   0.0  10   0
+4 -10   0.0  10   0;
 
 
 table B
@@ -84,7 +89,8 @@ objective..
 
 $offtext
 objective..
-  cost =e= sum(stages$(ord(stages) < card(stages)),sum(inputs,u(stages,inputs)));
+  cost =e= sum((stages,inputs)$(ord(stages) < card(stages)-1),u(stages,inputs)*u(stages,inputs));
+
 * fix the initial values
 x.fx('0',states) = Xinitial(states);
 
@@ -94,7 +100,7 @@ u.up(stages, inputs) =  Ubound; u.lo(stages, inputs) = -Ubound;
 * fix final control
 u.fx(stages, inputs)$(ord(stages) eq card(stages)) = 0;
 
-model lqr/all/;
+model lqr /all/;
 
 solve lqr using qcp minimizing cost;
 
