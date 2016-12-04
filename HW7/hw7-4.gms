@@ -20,7 +20,6 @@ equations
   def_y(i,j)
   def_r(i)
       ;
-
 inside_socp(i)..
     sqr(rc(i)) =G= sum(j,sqr(y(i,j))) ;
 
