@@ -18,8 +18,8 @@ K2 = 8000;
 positive variable X(I) "minutes per advertisement of type I"
 free variable cost;
 equations
-	witches_reached,
-	wizards_reached,
+	witches_reached "equation for witches reached",
+	wizards_reached "equation for wizards reached",
 	obj_eq;
 
 obj_eq..
@@ -31,6 +31,7 @@ wizards_reached..
 
 model w1 /obj_eq, witches_reached,wizards_reached/;	
 option nlp=KNITRO;
+
 solve w1 using nlp minimizing cost ;
 display x.L;
 parameter totalAdTime;
@@ -61,6 +62,7 @@ def_v(i)..
 
 option qcp = cplex;
 model w2 /obj_eq, witches_eq2, wizards_eq2, def_u, def_v /;
+option QCP=CPLEX
 solve w2 using qcp minimizing cost;
 
 

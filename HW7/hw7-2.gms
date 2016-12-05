@@ -37,17 +37,6 @@ variable
          u(stages, inputs)   input variables (controls)
          cost                   objective function
 ;
-$ontext
-table Q
-     1     2
-1   2.0   0.0
-2   0.0   1.0;
-$offtext
-$ontext
-table R
-     1
-1   6.0;
-$offtext
 
 table A
     1    2   3    4
@@ -75,21 +64,9 @@ state(stages, states)$(ord(stages) < card(stages))..
              +sum(m, B(states, m)*u(stages,m));
 
 * objective includes a numerical integral over [0,1], using Trapezoidal rule
-$ontext
-objective..
-    cost =e= (1/2) * deltaT *
-       ( sum(stages$(ord(stages) < card(stages)),
-           sum((states,n), x(stages,states)*Q(states,n)*x(stages,n))
-           + sum((inputs,m), u(stages,inputs)*R(inputs,m)*u(stages,m)) )
-        + sum(stages$(ord(stages) > 1),
-            sum((states,n), x(stages,states)*Q(states,n)*x(stages,n))
-            + sum((inputs,m), u(stages,inputs)*R(inputs,m)*u(stages,m)) )
-       )
-;
 
-$offtext
 objective..
-  cost =e= sum((stages,inputs)$(ord(stages) < card(stages)-1),u(stages,inputs)*u(stages,inputs));
+  cost =e= sum((stages,inputs)$(ord(stages) < card(stages)  ),u(stages,inputs)*u(stages,inputs));
 
 * fix the initial values
 x.fx('0',states) = Xinitial(states);
@@ -97,32 +74,12 @@ x.fx('0',states) = Xinitial(states);
 * fix lower and upper bounds
 u.up(stages, inputs) =  Ubound; u.lo(stages, inputs) = -Ubound;
 
-* fix final control
-u.fx(stages, inputs)$(ord(stages) eq card(stages)) = 0;
+* fix final states
+x.fx(stages, states)$(ord(stages) eq card(stages)) = 0;
 
 model lqr /all/;
-
+option QCP=CPLEX
 solve lqr using qcp minimizing cost;
 
 display Ubound; display cost.l; display x.l, u.l;
 
-* write output file
-file lqrout/lqr.out/;
-put lqrout
-put 'number of stages = ',card(stages)/;
-put 'optimal cost = ',cost.l:12:4//;
-loop (stages,
-  loop(states,
-    put x.l(stages, states):10:4,'  ';
-  );
-  put /;
-);
-put //
-loop (stages$(ord(stages)<card(stages)),
-  loop(inputs,
-    put u.l(stages, inputs):10:4,'  ';
-  );
-  put /;
-);
-put //;
-putclose;

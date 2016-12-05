@@ -16,9 +16,9 @@ free variables
   y(i,j) Separable points
 ;
 equations
-  inside_socp(i)
-  def_y(i,j)
-  def_r(i)
+  inside_socp(i) "socp constraint"
+  def_y(i,j) "distance of point y from center"
+  def_r(i) "radius constraint"
       ;
 inside_socp(i)..
     sqr(rc(i)) =G= sum(j,sqr(y(i,j))) ;

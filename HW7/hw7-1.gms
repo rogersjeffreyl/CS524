@@ -1,9 +1,9 @@
+$title  Support Vector Machines
+$if not set C $set C 1000
 $GDXIN abalone.gdx
-
-  
-  sets
-  	i(*),
-  	headr(*)
+sets
+  	i(*) 'index',
+  	headr(*) 'header'
   
 $load i,headr
 parameters
@@ -12,14 +12,14 @@ $load data
 $GDXIN
 alias (i,j,k);
 
-set features(headr);
+set features(headr) 'set of features';
 features(headr)=yes;
 features('Rings')=no;
-display features
-set train_indices(i) /1*4000/;
-set test_indices(i) /4001*4177/;
+
+set train_indices(i)  /1*4000/ ;
+set test_indices(i) 'test indices' /4001*4177/;
 parameter y(i);
-scalar C /%C%/;
+scalar C 'scalar for C in SVM'/%C%/ ;
 
 y(i)$(data(i,'Rings')>10)=1; 
 y(i)$(data(i,'Rings')<=10)=-1;
@@ -31,8 +31,8 @@ free variable w(headr);
 positive variable eta(train_indices);
 free variable primal_objective_value;
 equations
-	primal_constraint_1(train_indices),
-	primal_objective_eq;
+	primal_constraint_1(train_indices) 'primal equations one for each training example',
+	primal_objective_eq 'primal objective';
 
 primal_constraint_1(train_indices)..	
 	y(train_indices) *(sum(features,w(features)*data(train_indices,features))+gamma) =g=1-eta(train_indices);
@@ -49,7 +49,7 @@ display primal_objective_value.L
 display primal_constraint_1.m
 
 * Dual formulation
-  positive variable  alpha(train_indices);
+  positive variable  alpha(train_indices) 'dual variable one for each feature';
   variable v(headr);
   
   free variable dual_obj_value;
