@@ -1,0 +1,325 @@
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  set moves /"wake_up","fake_sleep"/;
+   2  alias (moves,I,J);
+   3   
+   4  table payoff_professor(i,j)
+   5                   fake_sleep  wake_up
+   6       fake_sleep  60              0
+   7       wake_up     45          30  ;
+   8   
+   9  table payoff_wife(i,j)
+  10                   fake_sleep  wake_up
+  11       fake_sleep  60             30
+  12       wake_up     0          30  ;
+  13   
+  14  set  T /1*2/;
+  15   
+  16  positive variables
+  17          X(T,I)
+  18          Y(T,J)  ;
+  19   
+  20  free variables
+  21          obj1,
+  22          obj2;
+  23   
+  24  equations
+  25          objective1,
+  26          objective2,
+  27          one_x(T),
+  28          one_y(T);
+  29   
+  30   
+  31  objective1..
+  32          obj1 =e=  sum(T, sum(  (I,J),  X(T,I)* payoff_professor(I,J) * Y(T,J) ) );
+  33   
+  34  objective2..
+  35          obj2 =e=  sum(T, sum((I,J),X(T,I)*payoff_wife(I,J)*Y(T,J)));
+  36   
+  37  one_x(T)..
+  38          sum (I, X(T,I))=e=1;
+  39   
+  40  one_y(T)..
+  41          sum (I, Y(T,I))=e=1;
+  42  model bimatrix /all/;
+  43   
+  44   
+  45   
+  46  file empinfo / '/Users/quickstep/Documents/git-workspace/CS524/HW8/225a/empinfo.dat' /;
+  47  put empinfo;
+  48  put 'equilibrium' /;
+  49  put "min obj1 x objective1 one_x"
+  50  put "min obj2 y objective2 one_y"
+  51  putclose empinfo;
+  52   
+  53   
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+  54  solve bimatrix using emp;
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE bimatrix Using EMP From line 54
+
+
+---- objective1  =E=  
+
+objective1..  (0)*X(1,wake_up) + (0)*X(1,fake_sleep) + (0)*X(2,wake_up) + (0)*X(2,fake_sleep) + (0)*Y(1,wake_up) + (0)*Y(1,fake_sleep) + (0)*Y(2,wake_up) + (0)*Y(2,fake_sleep) + obj1 =E= 0 ; (LHS = 0)
+     
+
+---- objective2  =E=  
+
+objective2..  (0)*X(1,wake_up) + (0)*X(1,fake_sleep) + (0)*X(2,wake_up) + (0)*X(2,fake_sleep) + (0)*Y(1,wake_up) + (0)*Y(1,fake_sleep) + (0)*Y(2,wake_up) + (0)*Y(2,fake_sleep) + obj2 =E= 0 ; (LHS = 0)
+     
+
+---- one_x  =E=  
+
+one_x(1)..  X(1,wake_up) + X(1,fake_sleep) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+one_x(2)..  X(2,wake_up) + X(2,fake_sleep) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+
+---- one_y  =E=  
+
+one_y(1)..  Y(1,wake_up) + Y(1,fake_sleep) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+one_y(2)..  Y(2,wake_up) + Y(2,fake_sleep) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE bimatrix Using EMP From line 54
+
+
+---- X  
+
+X(1,wake_up)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       (0)      objective1
+       (0)      objective2
+        1       one_x(1)
+
+X(1,fake_sleep)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       (0)      objective1
+       (0)      objective2
+        1       one_x(1)
+
+X(2,wake_up)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       (0)      objective1
+       (0)      objective2
+        1       one_x(2)
+
+REMAINING ENTRY SKIPPED
+
+---- Y  
+
+Y(1,wake_up)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       (0)      objective1
+       (0)      objective2
+        1       one_y(1)
+
+Y(1,fake_sleep)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       (0)      objective1
+       (0)      objective2
+        1       one_y(1)
+
+Y(2,wake_up)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       (0)      objective1
+       (0)      objective2
+        1       one_y(2)
+
+REMAINING ENTRY SKIPPED
+
+---- obj1  
+
+obj1
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       objective1
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE bimatrix Using EMP From line 54
+
+
+---- obj2  
+
+obj2
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       objective2
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE bimatrix Using EMP From line 54
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           4     SINGLE EQUATIONS            6
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES           10
+NON ZERO ELEMENTS            26     NON LINEAR N-Z             16
+DERIVATIVE POOL              20     CONSTANT POOL              19
+CODE LENGTH                  52
+
+
+GENERATION TIME      =        0.006 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+
+
+EXECUTION TIME       =        0.006 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE bimatrix Using EMP From line 54
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   bimatrix            
+     TYPE    EMP                 
+     SOLVER  JAMS                FROM LINE  54
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      2 Locally Optimal           
+
+ RESOURCE USAGE, LIMIT          0.010      1000.000
+ ITERATION COUNT, LIMIT         5    2000000000
+ EVALUATION ERRORS              0             0
+
+JAMS 1.0         24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
+
+JAMS - Solver for Extended Mathematical Programs (EMP)
+------------------------------------------------------
+--- EMP Summary
+    Logical Constraints = 0
+    Disjunctions        = 0
+    Adjusted Constraint = 0
+    Flipped Constraints = 0
+    Dual Variable Maps  = 0
+    Dual Equation Maps  = 0
+    VI Functions        = 0
+    Equilibrium Agent   = 2
+    Bilevel Followers   = 0
+
+--- The model /Users/quickstep/Documents/git-workspace/CS524/HW8/225a/emp.dat will be solved by GAMS
+---
+--- Returning from GAMS step
+12 row/cols, 36 non-zeros, 25.00% dense.
+
+Path 4.7.04 (Mon Sep 19 15:20:59 2016)
+Written by Todd Munson, Steven Dirkse, and Michael Ferris
+
+INITIAL POINT STATISTICS
+Maximum of X. . . . . . . . . .  0.0000e+00 var: (u3)
+Maximum of F. . . . . . . . . .  1.0000e+00 eqn: (e3)
+Maximum of Grad F . . . . . . .  6.0000e+01 eqn: (dL_dx6)
+                                            var: (x2)
+
+INITIAL JACOBIAN NORM STATISTICS
+Maximum Row Norm. . . . . . . .  7.6000e+01 eqn: (dL_dx1)
+Minimum Row Norm. . . . . . . .  2.0000e+00 eqn: (e3)
+Maximum Column Norm . . . . . .  1.0600e+02 var: (x6)
+Minimum Column Norm . . . . . .  2.0000e+00 var: (u3)
+
+FINAL STATISTICS
+Inf-Norm of Complementarity . .  3.2397e-10 eqn: (e3)
+Inf-Norm of Normal Map. . . . .  3.2397e-10 eqn: (e3)
+Inf-Norm of Minimum Map . . . .  3.2397e-10 eqn: (e3)
+Inf-Norm of Fischer Function. .  3.2397e-10 eqn: (e3)
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 8
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE bimatrix Using EMP From line 54
+
+
+Inf-Norm of Grad Fischer Fcn. .  7.2919e-10 eqn: (dL_dx2)
+Two-Norm of Grad Fischer Fcn. .  1.4673e-09
+
+FINAL POINT STATISTICS
+Maximum of X. . . . . . . . . .  4.0000e+01 var: (u3)
+Maximum of F. . . . . . . . . .  3.2397e-10 eqn: (e3)
+Maximum of Grad F . . . . . . .  6.0000e+01 eqn: (dL_dx6)
+                                            var: (x2)
+
+---
+--- Equations skipped = 2  Equations added = 8
+--- Variables skipped = 2  Variables added = 4
+---
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU objective1          .              .              .             1.0000      
+---- EQU objective2          .              .              .             1.0000      
+
+---- EQU one_x  
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1         1.0000         1.0000         1.0000        40.0000      
+2         1.0000         1.0000         1.0000        40.0000      
+
+---- EQU one_y  
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1         1.0000         1.0000         1.0000        30.0000      
+2         1.0000         1.0000         1.0000        30.0000      
+
+---- VAR X  
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+1.wake_up             .             0.5000        +INF             .          
+1.fake_sleep          .             0.5000        +INF             .          
+2.wake_up             .             0.5000        +INF             .          
+2.fake_sleep          .             0.5000        +INF             .          
+
+---- VAR Y  
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+1.wake_up             .             0.3333        +INF             .          
+1.fake_sleep          .             0.6667        +INF             .          
+2.wake_up             .             0.3333        +INF             .          
+2.fake_sleep          .             0.6667        +INF             .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 9
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE bimatrix Using EMP From line 54
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR obj1              -INF           80.0000        +INF             .          
+---- VAR obj2              -INF           60.0000        +INF             .          
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+                             0     ERRORS
+
+**** REPORT FILE SUMMARY
+
+empinfo /Users/quickstep/Documents/git-workspace/CS524/HW8/225a/empinfo.dat
+
+
+EXECUTION TIME       =        0.001 SECONDS      2 MB  24.7.4 r58773 DEX-DEG
+
+
+USER: CS 524 Course License                          G160914/0001AS-GEN
+      Prof. Ferris, UW-Madison, Fall 2016                        DC2937
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/quickstep/Documents/git-workspace/CS524/HW8/hw8-3.gms
+Output     /Users/quickstep/Documents/git-workspace/CS524/HW8/hw8-3.lst
