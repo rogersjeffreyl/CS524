@@ -56,9 +56,9 @@ raw_materials.up(t,R) = limit(R);
 products_sold.up(s,t,P) = scenarios(s,t,P);
   
 equations
-        objective
-        resource_eq
-        inventory_eq(scenario,t,P);
+        objective "objective equation"
+        resource_eq "resource consumption equation"
+        inventory_eq(scenario,t,P) "inventory equation";
  
 objective..
 	cost =e= sum( (t, R), 

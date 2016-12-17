@@ -1,15 +1,16 @@
+$title Wing Design
 scalars 
-	cda_0 /0.0306/,
-	rho /1.23/,
-	mu /1.78e-5/,
-	sw_s /2.05/,
-	k /1.2/,
-	e /0.96/,
-	w_0 /4940/,
-	n_lift /2.5/,
-	tau /0.12/,
-	v_min /22/,
-	cl_max /2.0/
+	cda_0  "Fuselage drag area" /0.0306/,
+	rho "Density of air" /1.23/,
+	mu "Viscosity of air" /1.78e-5/,
+	sw_s "Wetted area ratio" /2.05/,
+	k "Form factor" /1.2/,
+	e "Oswald efficiency factor" /0.96/,
+	w_0 "Aircraft weight excluding wing" /4940/,
+	n_lift "Ultimate load factor" /2.5/,
+	tau "Airfoil thickness-to-chord ratio" /0.12/,
+	v_min  "Desired landing speed" /22/,
+	cl_max "Maximum CL , flaps down" /2.0/
 	pi /3.1412/;
 
 positive variables 
@@ -122,7 +123,8 @@ model geometric_invertible /
 	g_w_eqn
 	g_v_eqn/;
 solve geometric_invertible minimizing drag using nlp;
-parameters 
+*parameters to hold the updated values
+parameters  
 	geoms,
 	geoma,
 	geomv,
