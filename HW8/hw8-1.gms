@@ -38,6 +38,7 @@ equation
 			
 D_eqn..
     drag =e= .5*rho*sqr(V)*c_d*S;
+  
 cd_eqn..
     1 =g= cda_0/(s*c_d) + k*C_f*sw_s/c_d + sqr(C_l)/(4*arctan(1)*(a)*e*c_d);
 weight_eqn..
@@ -121,8 +122,26 @@ model geometric_invertible /
 	g_w_eqn
 	g_v_eqn/;
 solve geometric_invertible minimizing drag using nlp;
-parameters gs,ga,gv;
-gs = exp(log_s.l);
-ga = exp(log_a.l);
-gv = exp(log_v.l)
-display gs,ga,gv;
+parameters 
+	geoms,
+	geoma,
+	geomv,
+	geomcd, 
+	geomcf,
+	geomcl, 
+	geomre,
+	geomw,  
+	geomww, 
+	geomb;  
+
+geoms = exp(log_s.l);
+geoma = exp(log_a.l);
+geomv = exp(log_v.l);
+geomcd = exp(log_cd.l);
+geomcf   = exp(log_cf.l);
+geomcl   = exp(log_cl.l); 
+geomre   = exp(log_re.l); 
+geomw   = exp(log_w.l);
+geomww   = exp(log_ww.l);
+geomb  = exp(log_b.l);
+display geoms,geoma,geomv;

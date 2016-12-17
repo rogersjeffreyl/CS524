@@ -1,4 +1,4 @@
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 1
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 18:20:35 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -6,12 +6,12 @@ C o m p i l a t i o n
    1  set moves /"wake_up","fake_sleep"/;
    2  alias (moves,I,J);
    3   
-   4  table payoff_professor(i,j)
+   4  table payoff_professor(i,j) "payoff matrix for player1(professor)"
    5                   fake_sleep  wake_up
    6       fake_sleep  60              0
    7       wake_up     45          30  ;
    8   
-   9  table payoff_wife(i,j)
+   9  table payoff_wife(i,j) "payoff matrix for player2(wife)"
   10                   fake_sleep  wake_up
   11       fake_sleep  60             30
   12       wake_up     0          30  ;
@@ -19,86 +19,77 @@ C o m p i l a t i o n
   14  set  T /1*2/;
   15   
   16  positive variables
-  17          X(T,I)
-  18          Y(T,J)  ;
+  17          X(T,I) "random variable for player1"
+  18          Y(T,J) "random variable for player2";
   19   
   20  free variables
-  21          obj1,
-  22          obj2;
+  21          obj1 "first players objective",
+  22          obj2 "second players objective";
   23   
   24  equations
-  25          objective1,
-  26          objective2,
-  27          one_x(T),
-  28          one_y(T);
-  29   
-  30   
-  31  objective1..
-  32          obj1 =e=  sum(T, sum(  (I,J),  X(T,I)* payoff_professor(I,J) * Y(T,J) ) );
-  33   
-  34  objective2..
-  35          obj2 =e=  sum(T, sum((I,J),X(T,I)*payoff_wife(I,J)*Y(T,J)));
-  36   
-  37  one_x(T)..
-  38          sum (I, X(T,I))=e=1;
-  39   
-  40  one_y(T)..
-  41          sum (I, Y(T,I))=e=1;
-  42  model bimatrix /all/;
-  43   
-  44   
-  45   
-  46  file empinfo / '/Users/quickstep/Documents/git-workspace/CS524/HW8/225a/empinfo.dat' /;
-  47  put empinfo;
-  48  put 'equilibrium' /;
-  49  put "min obj1 x objective1 one_x"
-  50  put "min obj2 y objective2 one_y"
-  51  putclose empinfo;
-  52   
-  53   
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 2
-G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-C o m p i l a t i o n
-
-
-  54  solve bimatrix using emp;
+  25          objective1 "objective for the second player",
+  26          objective2 "objective for the first player",
+  27          one_x(T)   "probability constraint for the first player",
+  28          one_y(T)   "probability constraint for the second player";
+  29  objective1..
+  30          obj1 =e=  sum(T, sum(  (I,J),  X(T,I)* payoff_professor(I,J) * Y(T,J) ) );
+  31   
+  32  objective2..
+  33          obj2 =e=  sum(T, sum((I,J),X(T,I)*payoff_wife(I,J)*Y(T,J)));
+  34   
+  35  one_x(T)..
+  36          sum (I, X(T,I))=e=1;
+  37   
+  38  one_y(T)..
+  39          sum (I, Y(T,I))=e=1;
+  40   
+  41  model bimatrix /all/;
+  42  file empinfo / '/Users/quickstep/Documents/git-workspace/CS524/HW8/225a/empinfo.dat' /;
+  43  put empinfo;
+  44  put 'equilibrium' /;
+  45  put "min obj1 x objective1 one_x"
+  46  put "min obj2 y objective2 one_y"
+  47  putclose empinfo;
+  48   
+  49   
+  50  solve bimatrix using emp;
 
 
 COMPILATION TIME     =        0.000 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 3
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 18:20:35 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Equation Listing    SOLVE bimatrix Using EMP From line 54
+Equation Listing    SOLVE bimatrix Using EMP From line 50
 
 
----- objective1  =E=  
+---- objective1  =E=  objective for the second player
 
 objective1..  (0)*X(1,wake_up) + (0)*X(1,fake_sleep) + (0)*X(2,wake_up) + (0)*X(2,fake_sleep) + (0)*Y(1,wake_up) + (0)*Y(1,fake_sleep) + (0)*Y(2,wake_up) + (0)*Y(2,fake_sleep) + obj1 =E= 0 ; (LHS = 0)
      
 
----- objective2  =E=  
+---- objective2  =E=  objective for the first player
 
 objective2..  (0)*X(1,wake_up) + (0)*X(1,fake_sleep) + (0)*X(2,wake_up) + (0)*X(2,fake_sleep) + (0)*Y(1,wake_up) + (0)*Y(1,fake_sleep) + (0)*Y(2,wake_up) + (0)*Y(2,fake_sleep) + obj2 =E= 0 ; (LHS = 0)
      
 
----- one_x  =E=  
+---- one_x  =E=  probability constraint for the first player
 
 one_x(1)..  X(1,wake_up) + X(1,fake_sleep) =E= 1 ; (LHS = 0, INFES = 1 ****)
      
 one_x(2)..  X(2,wake_up) + X(2,fake_sleep) =E= 1 ; (LHS = 0, INFES = 1 ****)
      
 
----- one_y  =E=  
+---- one_y  =E=  probability constraint for the second player
 
 one_y(1)..  Y(1,wake_up) + Y(1,fake_sleep) =E= 1 ; (LHS = 0, INFES = 1 ****)
      
 one_y(2)..  Y(2,wake_up) + Y(2,fake_sleep) =E= 1 ; (LHS = 0, INFES = 1 ****)
      
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 4
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 18:20:35 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Column Listing      SOLVE bimatrix Using EMP From line 54
+Column Listing      SOLVE bimatrix Using EMP From line 50
 
 
----- X  
+---- X  random variable for player1
 
 X(1,wake_up)
                 (.LO, .L, .UP, .M = 0, 0, +INF, 0)
@@ -120,7 +111,7 @@ X(2,wake_up)
 
 REMAINING ENTRY SKIPPED
 
----- Y  
+---- Y  random variable for player2
 
 Y(1,wake_up)
                 (.LO, .L, .UP, .M = 0, 0, +INF, 0)
@@ -142,26 +133,26 @@ Y(2,wake_up)
 
 REMAINING ENTRY SKIPPED
 
----- obj1  
+---- obj1  first players objective
 
 obj1
                 (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
         1       objective1
 
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 5
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 18:20:35 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Column Listing      SOLVE bimatrix Using EMP From line 54
+Column Listing      SOLVE bimatrix Using EMP From line 50
 
 
----- obj2  
+---- obj2  second players objective
 
 obj2
                 (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
         1       objective2
 
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 6
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 18:20:35 Page 5
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE bimatrix Using EMP From line 54
+Model Statistics    SOLVE bimatrix Using EMP From line 50
 
 
 MODEL STATISTICS
@@ -173,25 +164,25 @@ DERIVATIVE POOL              20     CONSTANT POOL              19
 CODE LENGTH                  52
 
 
-GENERATION TIME      =        0.006 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+GENERATION TIME      =        0.009 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
 
 
-EXECUTION TIME       =        0.006 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 7
+EXECUTION TIME       =        0.009 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 18:20:35 Page 6
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE bimatrix Using EMP From line 54
+Solution Report     SOLVE bimatrix Using EMP From line 50
 
 
                S O L V E      S U M M A R Y
 
      MODEL   bimatrix            
      TYPE    EMP                 
-     SOLVER  JAMS                FROM LINE  54
+     SOLVER  JAMS                FROM LINE  50
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      2 Locally Optimal           
 
- RESOURCE USAGE, LIMIT          0.010      1000.000
+ RESOURCE USAGE, LIMIT          0.004      1000.000
  ITERATION COUNT, LIMIT         5    2000000000
  EVALUATION ERRORS              0             0
 
@@ -235,9 +226,9 @@ Inf-Norm of Complementarity . .  3.2397e-10 eqn: (e3)
 Inf-Norm of Normal Map. . . . .  3.2397e-10 eqn: (e3)
 Inf-Norm of Minimum Map . . . .  3.2397e-10 eqn: (e3)
 Inf-Norm of Fischer Function. .  3.2397e-10 eqn: (e3)
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 8
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 18:20:35 Page 7
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE bimatrix Using EMP From line 54
+Solution Report     SOLVE bimatrix Using EMP From line 50
 
 
 Inf-Norm of Grad Fischer Fcn. .  7.2919e-10 eqn: (dL_dx2)
@@ -259,21 +250,24 @@ Maximum of Grad F . . . . . . .  6.0000e+01 eqn: (dL_dx6)
 ---- EQU objective1          .              .              .             1.0000      
 ---- EQU objective2          .              .              .             1.0000      
 
----- EQU one_x  
+  objective1  objective for the second player
+  objective2  objective for the first player
+
+---- EQU one_x  probability constraint for the first player
 
          LOWER          LEVEL          UPPER         MARGINAL
 
 1         1.0000         1.0000         1.0000        40.0000      
 2         1.0000         1.0000         1.0000        40.0000      
 
----- EQU one_y  
+---- EQU one_y  probability constraint for the second player
 
          LOWER          LEVEL          UPPER         MARGINAL
 
 1         1.0000         1.0000         1.0000        30.0000      
 2         1.0000         1.0000         1.0000        30.0000      
 
----- VAR X  
+---- VAR X  random variable for player1
 
                     LOWER          LEVEL          UPPER         MARGINAL
 
@@ -282,7 +276,7 @@ Maximum of Grad F . . . . . . .  6.0000e+01 eqn: (dL_dx6)
 2.wake_up             .             0.5000        +INF             .          
 2.fake_sleep          .             0.5000        +INF             .          
 
----- VAR Y  
+---- VAR Y  random variable for player2
 
                     LOWER          LEVEL          UPPER         MARGINAL
 
@@ -290,15 +284,18 @@ Maximum of Grad F . . . . . . .  6.0000e+01 eqn: (dL_dx6)
 1.fake_sleep          .             0.6667        +INF             .          
 2.wake_up             .             0.3333        +INF             .          
 2.fake_sleep          .             0.6667        +INF             .          
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 11:21:05 Page 9
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 18:20:35 Page 8
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE bimatrix Using EMP From line 54
+Solution Report     SOLVE bimatrix Using EMP From line 50
 
 
                            LOWER          LEVEL          UPPER         MARGINAL
 
 ---- VAR obj1              -INF           80.0000        +INF             .          
 ---- VAR obj2              -INF           60.0000        +INF             .          
+
+  obj1  first players objective
+  obj2  second players objective
 
 
 **** REPORT SUMMARY :        0     NONOPT
