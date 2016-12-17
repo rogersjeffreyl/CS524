@@ -1,0 +1,2 @@
+indic disjoint1(i,j)$order(i,j) 1
+indic disjoint2(i,j)$order(i,j) 0

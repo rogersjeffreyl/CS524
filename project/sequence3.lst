@@ -1,0 +1,105 @@
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 10:12:54 Page 1
+Sequencing on a single machine (Xpress Models: pp 128-132)
+using ordering and indicator constraints
+
+
+   3   
+      A set of tasks is to be processed on a single machine.
+      The execution of the tasks is non-preemptive (ie cannot be interrupted).
+      For every task i its release date, duration and due date are given.
+       
+      What is the sequence that minimizes the maximum tardiness?
+       
+      This formulation uses order and indicator variables (CPLEX)
+  13   
+  18   
+  19  set job / 1*7 /;
+  20  set times /release,duration,due/;
+  21   
+  22  table data(times,job)
+  23                  1       2       3       4       5       6       7
+  24  release         2       5       4                       8       9
+  25  duration        5       6       8       4       2       4       2
+  26  due             10      21      15      10      5       15      22
+  27  ;
+  28   
+  29  scalar M;
+  30  M = sum(job, data('duration',job));
+  31   
+  32  alias (job,i,j);
+  33   
+  34  binary variables order(i,j) "i must be ordered before j";
+  35  positive variables start(j) "start time of job j";
+  36  positive variables comp(j) "completion time of job j";
+  37  positive variables late(j) "lateness of job j";
+  38  variable tardiness;
+  39   
+  40  equations
+  41    defcomp(j),
+  42    disjoint1(i,j),
+  43    disjoint2(i,j),
+  44    deflate(j),
+  45    deftard(j),
+  46    dummy;
+  47   
+  48  dummy..
+  49    sum((i,j)$(ord(i) lt ord(j)), order(i,j)) =g= 0;
+  50   
+  51  defcomp(j)..
+  52    comp(j) =e= start(j) + data('duration',j);
+  53   
+  54  * The following are either-or constraints, do paper i or paper j
+  55  disjoint1(i,j)$(ord(i) lt ord(j))..
+  56    comp(i) =l= start(j);
+  57   
+  58  disjoint2(i,j)$(ord(i) lt ord(j))..
+  59    comp(j) =l= start(i);
+  60   
+  61  * This is really max(0, comp(j) - data('due',j))
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 10:12:54 Page 2
+Sequencing on a single machine (Xpress Models: pp 128-132)
+using ordering and indicator constraints
+
+
+  62  deflate(j)..
+  63    late(j) =g= comp(j) - data('due',j);
+  64   
+  65  deftard(j)..
+  66    tardiness =g= late(j);
+  67   
+  68  model sequence /all/;
+  69  sequence.optcr = 0;
+  70  sequence.optfile = 1;
+  71   
+  72  start.lo(j) = max(0, data('release',j));
+  73   
+  74  solve sequence using mip min tardiness;
+  75   
+  76  * How to generate sequence from start times?
+  77  parameter rank(i) = sort(start);
+****                    $97
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 10:12:54 Page 3
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Error Messages
+
+
+ 97  Explanatory text can not start with '$', '=', or '..'
+       (-or- check for missing ';' on previous line)
+
+**** 1 ERROR(S)   0 WARNING(S)
+
+
+COMPILATION TIME     =        0.002 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+
+
+USER: CS 524 Course License                          G160914/0001AS-GEN
+      Prof. Ferris, UW-Madison, Fall 2016                        DC2937
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/quickstep/Documents/CS524/tostud/sequence3.gms
+Output     /Users/quickstep/Documents/CS524/tostud/sequence3.lst
+
+**** USER ERROR(S) ENCOUNTERED

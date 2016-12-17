@@ -1,0 +1,423 @@
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/16/16 14:06:26 Page 1
+Flow shop scheduling  (Xpress models: pp 117-122)
+C o m p i l a t i o n
+
+
+   2   
+      A workshop that produces metal pipes on demand for automotive industry
+      has three machines for bending the pipes, soldering the fastenings, 
+      and assembling the links.  The workshop has to produce six items,
+      for which the durations of the processing steps are given below. 
+      Once started, jobs must be carried out to completion, but
+      the workpieces(items) may wait between the machines.
+       
+      Every machine only processs one item at a time.
+      A workpiece(item) may not overtake any other.
+       
+      What is the sequence that minimizes the total time for 
+      completing all items (makespan)?
+  17   
+  18  option limrow = 0, limcol = 0;
+  19   
+  20  set item / 1*6 /;
+  21  set mach /bending,soldering,assembly/;
+  22   
+  23  table proctime(mach,item)
+  24                  1       2       3       4       5       6
+  25  bending         3       6       3       5       5       7
+  26  soldering       5       4       2       4       4       5
+  27  assembly        5       2       4       6       3       6
+  28  ;
+  29   
+  30  alias (item,i);
+  31  alias (mach,m);
+  32  set k 'position' / p1*p6 /;
+  33   
+  34  set lastjob(k);
+  35  set lastmach(mach);
+  36  lastjob(k) = yes$(ord(k) eq card(k));
+  37  display lastjob;
+  38  lastmach(mach) = yes$(ord(mach) eq card(mach));
+  39   
+  40  binary variable rank(i,k) "item i has position k";
+  41  positive variables start(m,k) "start time for job in position k on m";
+  42  positive variables comp(m,k) "completion time for job in postion k on m";
+  43  variable totwait "time before first job + times between jobs on last machine";
+  44   
+  45  equations
+  46    oneInPosition(k),
+  47    oneRankPer(i),
+  48    onmachrel(m,k),
+  49    permachrel(m,k),
+  50    defcomp(m,k),
+  51    obj;
+  52   
+  53  oneInPosition(k)..
+  54    sum(i,rank(i,k)) =e= 1;
+  55   
+  56  oneRankPer(i)..
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/16/16 14:06:26 Page 2
+Flow shop scheduling  (Xpress models: pp 117-122)
+C o m p i l a t i o n
+
+
+  57    sum(k,rank(i,k)) =e= 1;
+  58   
+  59  onmachrel(m,k)$(not lastjob(k))..
+  60    start(m,k+1) =g= comp(m,k);
+  61   
+  62  permachrel(m,k)$(not lastmach(m))..
+  63    start(m+1,k) =g= comp(m,k);
+  64   
+  65  defcomp(m,k)..
+  66    comp(m,k) =e=
+  67      start(m,k) + sum(i, proctime(m,i)*rank(i,k));
+  68   
+  69  obj..
+  70    totwait =e= sum((lastmach,lastjob), comp(lastmach,lastjob));
+  71   
+  72  model sequence /all/;
+  73  sequence.optcr = 0;
+  74  solve sequence using mip min totwait;
+  75   
+  76  * Maybe the following is better info to output
+  77  parameter startjob(m,i);
+  78  startjob(m,i) = sum(k$rank.l(i,k), start.l(m,k));
+  79   
+  80  option rank:0:0:1; display rank.l;
+  81  option start:0:1:1; display start.l;
+  82  option startjob:0:1:1; display startjob;
+  83  display totwait.l;
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/16/16 14:06:26 Page 3
+Flow shop scheduling  (Xpress models: pp 117-122)
+E x e c u t i o n
+
+
+----     37 SET lastjob  
+
+p6
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/16/16 14:06:26 Page 4
+Flow shop scheduling  (Xpress models: pp 117-122)
+Model Statistics    SOLVE sequence Using MIP From line 74
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           6     SINGLE EQUATIONS           58
+BLOCKS OF VARIABLES           4     SINGLE VARIABLES           73
+NON ZERO ELEMENTS           272     DISCRETE VARIABLES         36
+
+
+GENERATION TIME      =        0.004 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+
+
+EXECUTION TIME       =        0.004 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/16/16 14:06:26 Page 5
+Flow shop scheduling  (Xpress models: pp 117-122)
+Solution Report     SOLVE sequence Using MIP From line 74
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   sequence            OBJECTIVE  totwait
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  74
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE               35.0000
+
+ RESOURCE USAGE, LIMIT          0.010      1000.000
+ ITERATION COUNT, LIMIT        48    2000000000
+
+IBM ILOG CPLEX   24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
+Cplex 12.6.3.0
+
+Space for names approximately 0.00 Mb
+Use option 'names no' to turn use of names off
+MIP status(101): integer optimal solution
+Cplex Time: 0.01sec (det. 1.54 ticks)
+Fixing integer variables, and solving final LP...
+Fixed MIP status(1): optimal
+Cplex Time: 0.00sec (det. 0.05 ticks)
+Proven optimal solution.
+
+MIP Solution:           35.000000    (48 iterations, 0 nodes)
+Final Solve:            35.000000    (0 iterations)
+
+Best possible:          35.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+---- EQU oneInPosition  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p1         1.0000         1.0000         1.0000          .          
+p2         1.0000         1.0000         1.0000          .          
+p3         1.0000         1.0000         1.0000          .          
+p4         1.0000         1.0000         1.0000          .          
+p5         1.0000         1.0000         1.0000          .          
+p6         1.0000         1.0000         1.0000          .          
+
+---- EQU oneRankPer  
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1         1.0000         1.0000         1.0000          .          
+2         1.0000         1.0000         1.0000          .          
+3         1.0000         1.0000         1.0000          .          
+4         1.0000         1.0000         1.0000          .          
+5         1.0000         1.0000         1.0000          .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/16/16 14:06:26 Page 6
+Flow shop scheduling  (Xpress models: pp 117-122)
+Solution Report     SOLVE sequence Using MIP From line 74
+
+
+     EQU oneRankPer  
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+6         1.0000         1.0000         1.0000          .          
+
+---- EQU onmachrel  
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+bending  .p1          .              .            +INF            1.0000      
+bending  .p2          .              .            +INF            1.0000      
+bending  .p3          .              .            +INF            1.0000      
+bending  .p4          .              .            +INF            1.0000      
+bending  .p5          .              .            +INF            1.0000      
+soldering.p1          .              .            +INF            EPS         
+soldering.p2          .             3.0000        +INF             .          
+soldering.p3          .              .            +INF             .          
+soldering.p4          .             1.0000        +INF             .          
+soldering.p5          .             2.0000        +INF             .          
+assembly .p1          .              .            +INF            EPS         
+assembly .p2          .             1.0000        +INF             .          
+assembly .p3          .              .            +INF            EPS         
+assembly .p4          .              .            +INF             .          
+assembly .p5          .              .            +INF             .          
+
+---- EQU permachrel  
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+bending  .p1          .              .            +INF            EPS         
+bending  .p2          .             2.0000        +INF             .          
+bending  .p3          .              .            +INF            EPS         
+bending  .p4          .              .            +INF            EPS         
+bending  .p5          .              .            +INF            EPS         
+bending  .p6          .              .            +INF            1.0000      
+soldering.p1          .              .            +INF            EPS         
+soldering.p2          .             3.0000        +INF             .          
+soldering.p3          .              .            +INF            EPS         
+soldering.p4          .             2.0000        +INF             .          
+soldering.p5          .              .            +INF            EPS         
+soldering.p6          .              .            +INF            1.0000      
+
+---- EQU defcomp  
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+bending  .p1          .              .              .             1.0000      
+bending  .p2          .              .              .             1.0000      
+bending  .p3          .              .              .             1.0000      
+bending  .p4          .              .              .             1.0000      
+bending  .p5          .              .              .             1.0000      
+bending  .p6          .              .              .             1.0000      
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/16/16 14:06:26 Page 7
+Flow shop scheduling  (Xpress models: pp 117-122)
+Solution Report     SOLVE sequence Using MIP From line 74
+
+
+     EQU defcomp  
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+soldering.p1          .              .              .             EPS         
+soldering.p2          .              .              .             EPS         
+soldering.p3          .              .              .             EPS         
+soldering.p4          .              .              .             EPS         
+soldering.p5          .              .              .             EPS         
+soldering.p6          .              .              .             1.0000      
+assembly .p1          .              .              .             EPS         
+assembly .p2          .              .              .             EPS         
+assembly .p3          .              .              .             EPS         
+assembly .p4          .              .              .             EPS         
+assembly .p5          .              .              .             EPS         
+assembly .p6          .              .              .             1.0000      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU obj                 .              .              .             1.0000      
+
+---- VAR rank  item i has position k
+
+            LOWER          LEVEL          UPPER         MARGINAL
+
+1.p1          .             1.0000         1.0000         3.0000      
+1.p2          .              .             1.0000         3.0000      
+1.p3          .              .             1.0000         3.0000      
+1.p4          .              .             1.0000         3.0000      
+1.p5          .              .             1.0000         3.0000      
+1.p6          .              .             1.0000        13.0000      
+2.p1          .              .             1.0000         6.0000      
+2.p2          .              .             1.0000         6.0000      
+2.p3          .              .             1.0000         6.0000      
+2.p4          .              .             1.0000         6.0000      
+2.p5          .              .             1.0000         6.0000      
+2.p6          .             1.0000         1.0000        12.0000      
+3.p1          .              .             1.0000         3.0000      
+3.p2          .             1.0000         1.0000         3.0000      
+3.p3          .              .             1.0000         3.0000      
+3.p4          .              .             1.0000         3.0000      
+3.p5          .              .             1.0000         3.0000      
+3.p6          .              .             1.0000         9.0000      
+4.p1          .              .             1.0000         5.0000      
+4.p2          .              .             1.0000         5.0000      
+4.p3          .              .             1.0000         5.0000      
+4.p4          .              .             1.0000         5.0000      
+4.p5          .             1.0000         1.0000         5.0000      
+4.p6          .              .             1.0000        15.0000      
+5.p1          .              .             1.0000         5.0000      
+5.p2          .              .             1.0000         5.0000      
+5.p3          .              .             1.0000         5.0000      
+5.p4          .             1.0000         1.0000         5.0000      
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/16/16 14:06:26 Page 8
+Flow shop scheduling  (Xpress models: pp 117-122)
+Solution Report     SOLVE sequence Using MIP From line 74
+
+
+     VAR rank  item i has position k
+
+            LOWER          LEVEL          UPPER         MARGINAL
+
+5.p5          .              .             1.0000         5.0000      
+5.p6          .              .             1.0000        12.0000      
+6.p1          .              .             1.0000         7.0000      
+6.p2          .              .             1.0000         7.0000      
+6.p3          .             1.0000         1.0000         7.0000      
+6.p4          .              .             1.0000         7.0000      
+6.p5          .              .             1.0000         7.0000      
+6.p6          .              .             1.0000        18.0000      
+
+---- VAR start  start time for job in position k on m
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+bending  .p1          .              .            +INF            1.0000      
+bending  .p2          .             3.0000        +INF             .          
+bending  .p3          .             6.0000        +INF             .          
+bending  .p4          .            13.0000        +INF             .          
+bending  .p5          .            18.0000        +INF             .          
+bending  .p6          .            23.0000        +INF             .          
+soldering.p1          .             3.0000        +INF             .          
+soldering.p2          .             8.0000        +INF             .          
+soldering.p3          .            13.0000        +INF             .          
+soldering.p4          .            18.0000        +INF             .          
+soldering.p5          .            23.0000        +INF             .          
+soldering.p6          .            29.0000        +INF             .          
+assembly .p1          .             8.0000        +INF             .          
+assembly .p2          .            13.0000        +INF             .          
+assembly .p3          .            18.0000        +INF             .          
+assembly .p4          .            24.0000        +INF             .          
+assembly .p5          .            27.0000        +INF             .          
+assembly .p6          .            33.0000        +INF             .          
+
+---- VAR comp  completion time for job in postion k on m
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+bending  .p1          .             3.0000        +INF             .          
+bending  .p2          .             6.0000        +INF             .          
+bending  .p3          .            13.0000        +INF             .          
+bending  .p4          .            18.0000        +INF             .          
+bending  .p5          .            23.0000        +INF             .          
+bending  .p6          .            29.0000        +INF             .          
+soldering.p1          .             8.0000        +INF             .          
+soldering.p2          .            10.0000        +INF             .          
+soldering.p3          .            18.0000        +INF             .          
+soldering.p4          .            22.0000        +INF             .          
+soldering.p5          .            27.0000        +INF             .          
+soldering.p6          .            33.0000        +INF             .          
+assembly .p1          .            13.0000        +INF             .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    11/16/16 14:06:26 Page 9
+Flow shop scheduling  (Xpress models: pp 117-122)
+Solution Report     SOLVE sequence Using MIP From line 74
+
+
+     VAR comp  completion time for job in postion k on m
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+assembly .p2          .            17.0000        +INF             .          
+assembly .p3          .            24.0000        +INF             .          
+assembly .p4          .            27.0000        +INF             .          
+assembly .p5          .            33.0000        +INF             .          
+assembly .p6          .            35.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR totwait           -INF           35.0000        +INF             .          
+
+  totwait  time before first job + times between jobs on last machine
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   11/16/16 14:06:26 Page 10
+Flow shop scheduling  (Xpress models: pp 117-122)
+E x e c u t i o n
+
+
+----     80 VARIABLE rank.L  item i has position k
+
+1.p1 1
+2.p6 1
+3.p2 1
+4.p5 1
+5.p4 1
+6.p3 1
+
+
+----     81 VARIABLE start.L  start time for job in position k on m
+
+                   p1          p2          p3          p4          p5          p6
+
+bending                         3           6          13          18          23
+soldering           3           8          13          18          23          29
+assembly            8          13          18          24          27          33
+
+
+----     82 PARAMETER startjob  
+
+                    1           2           3           4           5           6
+
+bending                        23           3          18          13           6
+soldering           3          29           8          23          18          13
+assembly            8          33          13          27          24          18
+
+
+----     83 VARIABLE totwait.L             =       35.000  time before first job + times between jobs on last machine
+
+
+EXECUTION TIME       =        0.002 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+
+
+USER: CS 524 Course License                          G160914/0001AS-GEN
+      Prof. Ferris, UW-Madison, Fall 2016                        DC2937
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/quickstep/Downloads/tostud/flowshop.gms
+Output     /Users/quickstep/Downloads/tostud/flowshop.lst

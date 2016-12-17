@@ -1,0 +1,1693 @@
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 13:51:46 Page 1
+Single Machine Schedling
+C o m p i l a t i o n
+
+
+   2  scalar total_memory_available /1000/;
+   3  set work_orders_all /a,b,c,da,db,dc,d,dd/;
+   4  set work_orders(work_orders_all) /a,b,c,da,db,dc/;
+   5  set k 'position' / p1*p8 /;
+   6  alias (work_orders_all,I,J);
+   7  scalar total_task_duration /14/;
+   8  set time /1*14/;
+   9  alias (time t,t1);
+  10  parameter duration(work_orders_all)
+  11                  /
+  12                          a   2,
+  13                          b       2,
+  14                          c   2,
+  15                          d   2,
+  16                          da   1,
+  17                          db   1,
+  18                          dc   1,
+  19                          dd   1 /;
+  20   
+  21  parameter memory_consumption(work_orders_all)
+  22                  /
+  23                          a   400,
+  24                          b       600,
+  25                          c   800,
+  26                          d   800,
+  27                          da  -400,
+  28                          db  -600,
+  29                          dc  -800,
+  30                          dd   -800/;
+  31   
+  32  set pred(i,j)
+  33                  /
+  34                          (a,b). c,
+  35                          a.b,
+  36                          a.da,
+  37                          b.db,
+  38                          c.dc,
+  39                          d.dd            /;
+  40   
+  41  free variable memory_footprint;
+  42   
+  43  binary variables
+  44          wo_scheduled(t,I)
+  45          wo_ended(t,I)
+  46          wo_active(t,I)
+  47          wo_mem_active(t,I);
+  48   
+  49  positive variable
+  50   
+  51          start(I) "time work order I starts",
+  52          dummy(I),
+  53          end(I) "time work order I ends";
+  54   
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 13:51:46 Page 2
+Single Machine Schedling
+C o m p i l a t i o n
+
+
+  55  equations
+  56          memory_footprint_objective,
+  57          wo_precedence_eq(I,J),
+  58          wo_end_time_eq(I),
+  59          only_one_can_be_scheduled(t),
+  60          a_wo_can_be_scheduled_only_once(I),
+  61          a_wo_can_end_only_once(I),
+  62          one_job_active(t),
+  63          start_less_end(I),
+  64          wo_scheduled_at(I),
+  65          wo_ended_at(I),
+  66          wo_active_eq(I,T),
+  67          wo_mem_active_constraint(T),
+  68          wo_mem_active_eq(I,T);
+  69  *       start_time_bound_eq(J)
+  70   
+  71   
+  72  wo_mem_active_constraint(T)..
+  73          sum(I,memory_consumption(I)*wo_mem_active(T,I)) =l=total_memory_available;
+  74   
+  75  wo_mem_active_eq(I,T)..
+  76          wo_mem_active(T,I) =e= wo_mem_active(T-1,I)+wo_scheduled(t,I);
+  77   
+  78  one_job_active(t)..
+  79          sum(I,wo_active(t,I)) =l=1;
+  80   
+  81  wo_active_eq(I,T)..
+  82          wo_active(T,I) =e= wo_active(T-1,I)+wo_scheduled(t,I)-wo_ended(t,I);
+  83   
+  84  wo_precedence_eq(I,J)$pred(I,J)..
+  85      start(J) =g= start(I) + duration(I);
+  86   
+  87  wo_end_time_eq(I)..
+  88          end(I) =e= start(I) + duration(I);
+  89   
+  90  wo_scheduled_at(I)..
+  91          sum(t,ord(t)*wo_scheduled(t,I)) =e= start(I);
+  92   
+  93  wo_ended_at(I)..
+  94          sum(t,ord(t)*wo_ended(t,I)) =e= end(I);
+  95   
+  96  only_one_can_be_scheduled(t)..
+  97          sum(I,wo_scheduled(t,I)) =l= 1;
+  98   
+  99  a_wo_can_be_scheduled_only_once(I)..
+ 100          sum(t,wo_scheduled(t,I)) =e= 1;
+ 101   
+ 102  a_wo_can_end_only_once(I)..
+ 103          sum(t,wo_ended(t,I)) =e= 1;
+ 104   
+ 105  start_less_end(I)..
+ 106          start(I) =l=end(I);
+ 107   
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 13:51:46 Page 3
+Single Machine Schedling
+C o m p i l a t i o n
+
+
+ 108  memory_footprint_objective..
+ 109          memory_footprint =e= sum(I,memory_consumption(I)*(total_task_duration-sum(T,ord(t)*wo_scheduled(t,I))) );
+ 110   
+ 111   
+ 112   
+ 113  model scheduling /all/;
+ 114  scheduling.optcr=0;
+ 115  solve scheduling using  mip minimizing  memory_footprint;
+ 116  display memory_footprint.L
+ 117  display start.L
+ 118  display wo_scheduled.L
+ 119  display wo_ended.L
+ 120  display wo_active.L
+ 121  display wo_mem_active.L
+ 122   
+ 123   
+ 124   
+
+
+COMPILATION TIME     =        0.001 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 13:51:46 Page 4
+Single Machine Schedling
+Equation Listing    SOLVE scheduling Using MIP From line 115
+
+
+---- memory_footprint_objective  =E=  
+
+memory_footprint_objective..  memory_footprint + 400*wo_scheduled(1,a) + 600*wo_scheduled(1,b) + 800*wo_scheduled(1,c) - 400*wo_scheduled(1,da) - 600*wo_scheduled(1,db) - 800*wo_scheduled(1,dc) + 800*wo_scheduled(1,d) - 800*wo_scheduled(1,dd)
+     
+      + 800*wo_scheduled(2,a) + 1200*wo_scheduled(2,b) + 1600*wo_scheduled(2,c) - 800*wo_scheduled(2,da) - 1200*wo_scheduled(2,db) - 1600*wo_scheduled(2,dc) + 1600*wo_scheduled(2,d) - 1600*wo_scheduled(2,dd) + 1200*wo_scheduled(3,a)
+     
+      + 1800*wo_scheduled(3,b) + 2400*wo_scheduled(3,c) - 1200*wo_scheduled(3,da) - 1800*wo_scheduled(3,db) - 2400*wo_scheduled(3,dc) + 2400*wo_scheduled(3,d) - 2400*wo_scheduled(3,dd) + 1600*wo_scheduled(4,a) + 2400*wo_scheduled(4,b)
+     
+      + 3200*wo_scheduled(4,c) - 1600*wo_scheduled(4,da) - 2400*wo_scheduled(4,db) - 3200*wo_scheduled(4,dc) + 3200*wo_scheduled(4,d) - 3200*wo_scheduled(4,dd) + 2000*wo_scheduled(5,a) + 3000*wo_scheduled(5,b) + 4000*wo_scheduled(5,c)
+     
+      - 2000*wo_scheduled(5,da) - 3000*wo_scheduled(5,db) - 4000*wo_scheduled(5,dc) + 4000*wo_scheduled(5,d) - 4000*wo_scheduled(5,dd) + 2400*wo_scheduled(6,a) + 3600*wo_scheduled(6,b) + 4800*wo_scheduled(6,c) - 2400*wo_scheduled(6,da)
+     
+      - 3600*wo_scheduled(6,db) - 4800*wo_scheduled(6,dc) + 4800*wo_scheduled(6,d) - 4800*wo_scheduled(6,dd) + 2800*wo_scheduled(7,a) + 4200*wo_scheduled(7,b) + 5600*wo_scheduled(7,c) - 2800*wo_scheduled(7,da) - 4200*wo_scheduled(7,db)
+     
+      - 5600*wo_scheduled(7,dc) + 5600*wo_scheduled(7,d) - 5600*wo_scheduled(7,dd) + 3200*wo_scheduled(8,a) + 4800*wo_scheduled(8,b) + 6400*wo_scheduled(8,c) - 3200*wo_scheduled(8,da) - 4800*wo_scheduled(8,db) - 6400*wo_scheduled(8,dc)
+     
+      + 6400*wo_scheduled(8,d) - 6400*wo_scheduled(8,dd) + 3600*wo_scheduled(9,a) + 5400*wo_scheduled(9,b) + 7200*wo_scheduled(9,c) - 3600*wo_scheduled(9,da) - 5400*wo_scheduled(9,db) - 7200*wo_scheduled(9,dc) + 7200*wo_scheduled(9,d)
+     
+      - 7200*wo_scheduled(9,dd) + 4000*wo_scheduled(10,a) + 6000*wo_scheduled(10,b) + 8000*wo_scheduled(10,c) - 4000*wo_scheduled(10,da) - 6000*wo_scheduled(10,db) - 8000*wo_scheduled(10,dc) + 8000*wo_scheduled(10,d) - 8000*wo_scheduled(10,dd)
+     
+      + 4400*wo_scheduled(11,a) + 6600*wo_scheduled(11,b) + 8800*wo_scheduled(11,c) - 4400*wo_scheduled(11,da) - 6600*wo_scheduled(11,db) - 8800*wo_scheduled(11,dc) + 8800*wo_scheduled(11,d) - 8800*wo_scheduled(11,dd) + 4800*wo_scheduled(12,a)
+     
+      + 7200*wo_scheduled(12,b) + 9600*wo_scheduled(12,c) - 4800*wo_scheduled(12,da) - 7200*wo_scheduled(12,db) - 9600*wo_scheduled(12,dc) + 9600*wo_scheduled(12,d) - 9600*wo_scheduled(12,dd) + 5200*wo_scheduled(13,a) + 7800*wo_scheduled(13,b)
+     
+      + 10400*wo_scheduled(13,c) - 5200*wo_scheduled(13,da) - 7800*wo_scheduled(13,db) - 10400*wo_scheduled(13,dc) + 10400*wo_scheduled(13,d) - 10400*wo_scheduled(13,dd) + 5600*wo_scheduled(14,a) + 8400*wo_scheduled(14,b) + 11200*wo_scheduled(14,c)
+     
+      - 5600*wo_scheduled(14,da) - 8400*wo_scheduled(14,db) - 11200*wo_scheduled(14,dc) + 11200*wo_scheduled(14,d) - 11200*wo_scheduled(14,dd) =E= 0 ; (LHS = 0)
+     
+
+---- wo_precedence_eq  =G=  
+
+wo_precedence_eq(a,b)..  - start(a) + start(b) =G= 2 ; (LHS = 0, INFES = 2 ****)
+     
+wo_precedence_eq(a,c)..  - start(a) + start(c) =G= 2 ; (LHS = 0, INFES = 2 ****)
+     
+wo_precedence_eq(a,da)..  - start(a) + start(da) =G= 2 ; (LHS = 0, INFES = 2 ****)
+     
+REMAINING 4 ENTRIES SKIPPED
+
+
+---- wo_end_time_eq  =E=  
+
+wo_end_time_eq(a)..  - start(a) + end(a) =E= 2 ; (LHS = 0, INFES = 2 ****)
+     
+wo_end_time_eq(b)..  - start(b) + end(b) =E= 2 ; (LHS = 0, INFES = 2 ****)
+     
+wo_end_time_eq(c)..  - start(c) + end(c) =E= 2 ; (LHS = 0, INFES = 2 ****)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 13:51:46 Page 5
+Single Machine Schedling
+Equation Listing    SOLVE scheduling Using MIP From line 115
+
+
+---- only_one_can_be_scheduled  =L=  
+
+only_one_can_be_scheduled(1)..  wo_scheduled(1,a) + wo_scheduled(1,b) + wo_scheduled(1,c) + wo_scheduled(1,da) + wo_scheduled(1,db) + wo_scheduled(1,dc) + wo_scheduled(1,d) + wo_scheduled(1,dd) =L= 1 ; (LHS = 0)
+     
+only_one_can_be_scheduled(2)..  wo_scheduled(2,a) + wo_scheduled(2,b) + wo_scheduled(2,c) + wo_scheduled(2,da) + wo_scheduled(2,db) + wo_scheduled(2,dc) + wo_scheduled(2,d) + wo_scheduled(2,dd) =L= 1 ; (LHS = 0)
+     
+only_one_can_be_scheduled(3)..  wo_scheduled(3,a) + wo_scheduled(3,b) + wo_scheduled(3,c) + wo_scheduled(3,da) + wo_scheduled(3,db) + wo_scheduled(3,dc) + wo_scheduled(3,d) + wo_scheduled(3,dd) =L= 1 ; (LHS = 0)
+     
+REMAINING 11 ENTRIES SKIPPED
+
+
+---- a_wo_can_be_scheduled_only_once  =E=  
+
+a_wo_can_be_scheduled_only_once(a)..  wo_scheduled(1,a) + wo_scheduled(2,a) + wo_scheduled(3,a) + wo_scheduled(4,a) + wo_scheduled(5,a) + wo_scheduled(6,a) + wo_scheduled(7,a) + wo_scheduled(8,a) + wo_scheduled(9,a) + wo_scheduled(10,a)
+     
+      + wo_scheduled(11,a) + wo_scheduled(12,a) + wo_scheduled(13,a) + wo_scheduled(14,a) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+a_wo_can_be_scheduled_only_once(b)..  wo_scheduled(1,b) + wo_scheduled(2,b) + wo_scheduled(3,b) + wo_scheduled(4,b) + wo_scheduled(5,b) + wo_scheduled(6,b) + wo_scheduled(7,b) + wo_scheduled(8,b) + wo_scheduled(9,b) + wo_scheduled(10,b)
+     
+      + wo_scheduled(11,b) + wo_scheduled(12,b) + wo_scheduled(13,b) + wo_scheduled(14,b) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+a_wo_can_be_scheduled_only_once(c)..  wo_scheduled(1,c) + wo_scheduled(2,c) + wo_scheduled(3,c) + wo_scheduled(4,c) + wo_scheduled(5,c) + wo_scheduled(6,c) + wo_scheduled(7,c) + wo_scheduled(8,c) + wo_scheduled(9,c) + wo_scheduled(10,c)
+     
+      + wo_scheduled(11,c) + wo_scheduled(12,c) + wo_scheduled(13,c) + wo_scheduled(14,c) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- a_wo_can_end_only_once  =E=  
+
+a_wo_can_end_only_once(a)..  wo_ended(1,a) + wo_ended(2,a) + wo_ended(3,a) + wo_ended(4,a) + wo_ended(5,a) + wo_ended(6,a) + wo_ended(7,a) + wo_ended(8,a) + wo_ended(9,a) + wo_ended(10,a) + wo_ended(11,a) + wo_ended(12,a) + wo_ended(13,a) + wo_ended(14,a)
+      =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+a_wo_can_end_only_once(b)..  wo_ended(1,b) + wo_ended(2,b) + wo_ended(3,b) + wo_ended(4,b) + wo_ended(5,b) + wo_ended(6,b) + wo_ended(7,b) + wo_ended(8,b) + wo_ended(9,b) + wo_ended(10,b) + wo_ended(11,b) + wo_ended(12,b) + wo_ended(13,b) + wo_ended(14,b)
+      =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+a_wo_can_end_only_once(c)..  wo_ended(1,c) + wo_ended(2,c) + wo_ended(3,c) + wo_ended(4,c) + wo_ended(5,c) + wo_ended(6,c) + wo_ended(7,c) + wo_ended(8,c) + wo_ended(9,c) + wo_ended(10,c) + wo_ended(11,c) + wo_ended(12,c) + wo_ended(13,c) + wo_ended(14,c)
+      =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- one_job_active  =L=  
+
+one_job_active(1)..  wo_active(1,a) + wo_active(1,b) + wo_active(1,c) + wo_active(1,da) + wo_active(1,db) + wo_active(1,dc) + wo_active(1,d) + wo_active(1,dd) =L= 1 ; (LHS = 0)
+     
+one_job_active(2)..  wo_active(2,a) + wo_active(2,b) + wo_active(2,c) + wo_active(2,da) + wo_active(2,db) + wo_active(2,dc) + wo_active(2,d) + wo_active(2,dd) =L= 1 ; (LHS = 0)
+     
+one_job_active(3)..  wo_active(3,a) + wo_active(3,b) + wo_active(3,c) + wo_active(3,da) + wo_active(3,db) + wo_active(3,dc) + wo_active(3,d) + wo_active(3,dd) =L= 1 ; (LHS = 0)
+     
+REMAINING 11 ENTRIES SKIPPED
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 13:51:46 Page 6
+Single Machine Schedling
+Equation Listing    SOLVE scheduling Using MIP From line 115
+
+
+---- start_less_end  =L=  
+
+start_less_end(a)..  start(a) - end(a) =L= 0 ; (LHS = 0)
+     
+start_less_end(b)..  start(b) - end(b) =L= 0 ; (LHS = 0)
+     
+start_less_end(c)..  start(c) - end(c) =L= 0 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- wo_scheduled_at  =E=  
+
+wo_scheduled_at(a)..  wo_scheduled(1,a) + 2*wo_scheduled(2,a) + 3*wo_scheduled(3,a) + 4*wo_scheduled(4,a) + 5*wo_scheduled(5,a) + 6*wo_scheduled(6,a) + 7*wo_scheduled(7,a) + 8*wo_scheduled(8,a) + 9*wo_scheduled(9,a) + 10*wo_scheduled(10,a)
+     
+      + 11*wo_scheduled(11,a) + 12*wo_scheduled(12,a) + 13*wo_scheduled(13,a) + 14*wo_scheduled(14,a) - start(a) =E= 0 ; (LHS = 0)
+     
+wo_scheduled_at(b)..  wo_scheduled(1,b) + 2*wo_scheduled(2,b) + 3*wo_scheduled(3,b) + 4*wo_scheduled(4,b) + 5*wo_scheduled(5,b) + 6*wo_scheduled(6,b) + 7*wo_scheduled(7,b) + 8*wo_scheduled(8,b) + 9*wo_scheduled(9,b) + 10*wo_scheduled(10,b)
+     
+      + 11*wo_scheduled(11,b) + 12*wo_scheduled(12,b) + 13*wo_scheduled(13,b) + 14*wo_scheduled(14,b) - start(b) =E= 0 ; (LHS = 0)
+     
+wo_scheduled_at(c)..  wo_scheduled(1,c) + 2*wo_scheduled(2,c) + 3*wo_scheduled(3,c) + 4*wo_scheduled(4,c) + 5*wo_scheduled(5,c) + 6*wo_scheduled(6,c) + 7*wo_scheduled(7,c) + 8*wo_scheduled(8,c) + 9*wo_scheduled(9,c) + 10*wo_scheduled(10,c)
+     
+      + 11*wo_scheduled(11,c) + 12*wo_scheduled(12,c) + 13*wo_scheduled(13,c) + 14*wo_scheduled(14,c) - start(c) =E= 0 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- wo_ended_at  =E=  
+
+wo_ended_at(a)..  wo_ended(1,a) + 2*wo_ended(2,a) + 3*wo_ended(3,a) + 4*wo_ended(4,a) + 5*wo_ended(5,a) + 6*wo_ended(6,a) + 7*wo_ended(7,a) + 8*wo_ended(8,a) + 9*wo_ended(9,a) + 10*wo_ended(10,a) + 11*wo_ended(11,a) + 12*wo_ended(12,a) + 13*wo_ended(13,a)
+     
+      + 14*wo_ended(14,a) - end(a) =E= 0 ; (LHS = 0)
+     
+wo_ended_at(b)..  wo_ended(1,b) + 2*wo_ended(2,b) + 3*wo_ended(3,b) + 4*wo_ended(4,b) + 5*wo_ended(5,b) + 6*wo_ended(6,b) + 7*wo_ended(7,b) + 8*wo_ended(8,b) + 9*wo_ended(9,b) + 10*wo_ended(10,b) + 11*wo_ended(11,b) + 12*wo_ended(12,b) + 13*wo_ended(13,b)
+     
+      + 14*wo_ended(14,b) - end(b) =E= 0 ; (LHS = 0)
+     
+wo_ended_at(c)..  wo_ended(1,c) + 2*wo_ended(2,c) + 3*wo_ended(3,c) + 4*wo_ended(4,c) + 5*wo_ended(5,c) + 6*wo_ended(6,c) + 7*wo_ended(7,c) + 8*wo_ended(8,c) + 9*wo_ended(9,c) + 10*wo_ended(10,c) + 11*wo_ended(11,c) + 12*wo_ended(12,c) + 13*wo_ended(13,c)
+     
+      + 14*wo_ended(14,c) - end(c) =E= 0 ; (LHS = 0)
+     
+REMAINING 5 ENTRIES SKIPPED
+
+
+---- wo_active_eq  =E=  
+
+wo_active_eq(a,1)..  - wo_scheduled(1,a) + wo_ended(1,a) + wo_active(1,a) =E= 0 ; (LHS = 0)
+     
+wo_active_eq(a,2)..  - wo_scheduled(2,a) + wo_ended(2,a) - wo_active(1,a) + wo_active(2,a) =E= 0 ; (LHS = 0)
+     
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 13:51:46 Page 7
+Single Machine Schedling
+Equation Listing    SOLVE scheduling Using MIP From line 115
+
+
+     wo_active_eq  =E=  
+
+wo_active_eq(a,3)..  - wo_scheduled(3,a) + wo_ended(3,a) - wo_active(2,a) + wo_active(3,a) =E= 0 ; (LHS = 0)
+     
+REMAINING 109 ENTRIES SKIPPED
+
+
+---- wo_mem_active_constraint  =L=  
+
+wo_mem_active_constraint(1)..  400*wo_mem_active(1,a) + 600*wo_mem_active(1,b) + 800*wo_mem_active(1,c) - 400*wo_mem_active(1,da) - 600*wo_mem_active(1,db) - 800*wo_mem_active(1,dc) + 800*wo_mem_active(1,d) - 800*wo_mem_active(1,dd) =L= 1000 ; (LHS = 0)
+     
+wo_mem_active_constraint(2)..  400*wo_mem_active(2,a) + 600*wo_mem_active(2,b) + 800*wo_mem_active(2,c) - 400*wo_mem_active(2,da) - 600*wo_mem_active(2,db) - 800*wo_mem_active(2,dc) + 800*wo_mem_active(2,d) - 800*wo_mem_active(2,dd) =L= 1000 ; (LHS = 0)
+     
+wo_mem_active_constraint(3)..  400*wo_mem_active(3,a) + 600*wo_mem_active(3,b) + 800*wo_mem_active(3,c) - 400*wo_mem_active(3,da) - 600*wo_mem_active(3,db) - 800*wo_mem_active(3,dc) + 800*wo_mem_active(3,d) - 800*wo_mem_active(3,dd) =L= 1000 ; (LHS = 0)
+     
+REMAINING 11 ENTRIES SKIPPED
+
+
+---- wo_mem_active_eq  =E=  
+
+wo_mem_active_eq(a,1)..  - wo_scheduled(1,a) + wo_mem_active(1,a) =E= 0 ; (LHS = 0)
+     
+wo_mem_active_eq(a,2)..  - wo_scheduled(2,a) - wo_mem_active(1,a) + wo_mem_active(2,a) =E= 0 ; (LHS = 0)
+     
+wo_mem_active_eq(a,3)..  - wo_scheduled(3,a) - wo_mem_active(2,a) + wo_mem_active(3,a) =E= 0 ; (LHS = 0)
+     
+REMAINING 109 ENTRIES SKIPPED
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 13:51:46 Page 8
+Single Machine Schedling
+Column Listing      SOLVE scheduling Using MIP From line 115
+
+
+---- memory_footprint  
+
+memory_footprint
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       memory_footprint_objective
+
+
+---- wo_scheduled  
+
+wo_scheduled(1,a)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      400       memory_footprint_objective
+        1       only_one_can_be_scheduled(1)
+        1       a_wo_can_be_scheduled_only_once(a)
+        1       wo_scheduled_at(a)
+       -1       wo_active_eq(a,1)
+       -1       wo_mem_active_eq(a,1)
+
+wo_scheduled(1,b)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      600       memory_footprint_objective
+        1       only_one_can_be_scheduled(1)
+        1       a_wo_can_be_scheduled_only_once(b)
+        1       wo_scheduled_at(b)
+       -1       wo_active_eq(b,1)
+       -1       wo_mem_active_eq(b,1)
+
+wo_scheduled(1,c)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      800       memory_footprint_objective
+        1       only_one_can_be_scheduled(1)
+        1       a_wo_can_be_scheduled_only_once(c)
+        1       wo_scheduled_at(c)
+       -1       wo_active_eq(c,1)
+       -1       wo_mem_active_eq(c,1)
+
+REMAINING 109 ENTRIES SKIPPED
+
+---- wo_ended  
+
+wo_ended(1,a)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+        1       a_wo_can_end_only_once(a)
+        1       wo_ended_at(a)
+        1       wo_active_eq(a,1)
+
+wo_ended(1,b)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+        1       a_wo_can_end_only_once(b)
+        1       wo_ended_at(b)
+        1       wo_active_eq(b,1)
+
+wo_ended(1,c)
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 13:51:46 Page 9
+Single Machine Schedling
+Column Listing      SOLVE scheduling Using MIP From line 115
+
+
+     wo_ended  
+
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+        1       a_wo_can_end_only_once(c)
+        1       wo_ended_at(c)
+        1       wo_active_eq(c,1)
+
+REMAINING 109 ENTRIES SKIPPED
+
+---- wo_active  
+
+wo_active(1,a)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+        1       one_job_active(1)
+        1       wo_active_eq(a,1)
+       -1       wo_active_eq(a,2)
+
+wo_active(1,b)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+        1       one_job_active(1)
+        1       wo_active_eq(b,1)
+       -1       wo_active_eq(b,2)
+
+wo_active(1,c)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+        1       one_job_active(1)
+        1       wo_active_eq(c,1)
+       -1       wo_active_eq(c,2)
+
+REMAINING 109 ENTRIES SKIPPED
+
+---- wo_mem_active  
+
+wo_mem_active(1,a)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      400       wo_mem_active_constraint(1)
+        1       wo_mem_active_eq(a,1)
+       -1       wo_mem_active_eq(a,2)
+
+wo_mem_active(1,b)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      600       wo_mem_active_constraint(1)
+        1       wo_mem_active_eq(b,1)
+       -1       wo_mem_active_eq(b,2)
+
+wo_mem_active(1,c)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+      800       wo_mem_active_constraint(1)
+        1       wo_mem_active_eq(c,1)
+       -1       wo_mem_active_eq(c,2)
+
+REMAINING 109 ENTRIES SKIPPED
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 10
+Single Machine Schedling
+Column Listing      SOLVE scheduling Using MIP From line 115
+
+
+---- start  time work order I starts
+
+start(a)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       wo_precedence_eq(a,b)
+       -1       wo_precedence_eq(a,c)
+       -1       wo_precedence_eq(a,da)
+       -1       wo_end_time_eq(a)
+        1       start_less_end(a)
+       -1       wo_scheduled_at(a)
+
+start(b)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       wo_precedence_eq(a,b)
+       -1       wo_precedence_eq(b,c)
+       -1       wo_precedence_eq(b,db)
+       -1       wo_end_time_eq(b)
+        1       start_less_end(b)
+       -1       wo_scheduled_at(b)
+
+start(c)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       wo_precedence_eq(a,c)
+        1       wo_precedence_eq(b,c)
+       -1       wo_precedence_eq(c,dc)
+       -1       wo_end_time_eq(c)
+        1       start_less_end(c)
+       -1       wo_scheduled_at(c)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- end  time work order I ends
+
+end(a)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       wo_end_time_eq(a)
+       -1       start_less_end(a)
+       -1       wo_ended_at(a)
+
+end(b)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       wo_end_time_eq(b)
+       -1       start_less_end(b)
+       -1       wo_ended_at(b)
+
+end(c)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       wo_end_time_eq(c)
+       -1       start_less_end(c)
+       -1       wo_ended_at(c)
+
+REMAINING 5 ENTRIES SKIPPED
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 11
+Single Machine Schedling
+Model Statistics    SOLVE scheduling Using MIP From line 115
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS          13     SINGLE EQUATIONS          322
+BLOCKS OF VARIABLES           7     SINGLE VARIABLES          465
+NON ZERO ELEMENTS         1,727     DISCRETE VARIABLES        448
+
+
+GENERATION TIME      =        0.014 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+
+
+EXECUTION TIME       =        0.014 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 12
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   scheduling          OBJECTIVE  memory_footprint
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  115
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE             5200.0000
+
+ RESOURCE USAGE, LIMIT          0.066      1000.000
+ ITERATION COUNT, LIMIT       218    2000000000
+
+IBM ILOG CPLEX   24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
+--- GAMS/Cplex licensed for continuous and discrete problems.
+Cplex 12.6.3.0
+
+Space for names approximately 0.02 Mb
+Use option 'names no' to turn use of names off
+MIP status(101): integer optimal solution
+Cplex Time: 0.05sec (det. 20.70 ticks)
+Fixing integer variables, and solving final LP...
+Fixed MIP status(1): optimal
+Cplex Time: 0.00sec (det. 0.29 ticks)
+Proven optimal solution.
+
+MIP Solution:         5200.000000    (218 iterations, 0 nodes)
+Final Solve:          5200.000000    (0 iterations)
+
+Best possible:        5200.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU memory_fo~          .              .              .             1.0000      
+
+---- EQU wo_precedence_eq  
+
+            LOWER          LEVEL          UPPER         MARGINAL
+
+a.b          2.0000         3.0000        +INF             .          
+a.c          2.0000         6.0000        +INF             .          
+a.da         2.0000         2.0000        +INF             .          
+b.c          2.0000         3.0000        +INF             .          
+b.db         2.0000         2.0000        +INF             .          
+c.dc         2.0000         2.0000        +INF             .          
+d.dd         2.0000         2.0000        +INF             .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 13
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+---- EQU wo_end_time_eq  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+a          2.0000         2.0000         2.0000          .          
+b          2.0000         2.0000         2.0000          .          
+c          2.0000         2.0000         2.0000          .          
+da         1.0000         1.0000         1.0000          .          
+db         1.0000         1.0000         1.0000          .          
+dc         1.0000         1.0000         1.0000          .          
+d          2.0000         2.0000         2.0000          .          
+dd         1.0000         1.0000         1.0000          .          
+
+---- EQU only_one_can_be_scheduled  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1         -INF            1.0000         1.0000          .          
+2         -INF             .             1.0000          .          
+3         -INF            1.0000         1.0000          .          
+4         -INF            1.0000         1.0000          .          
+5         -INF             .             1.0000          .          
+6         -INF            1.0000         1.0000          .          
+7         -INF            1.0000         1.0000          .          
+8         -INF             .             1.0000          .          
+9         -INF            1.0000         1.0000          .          
+10        -INF            1.0000         1.0000          .          
+11        -INF             .             1.0000          .          
+12        -INF            1.0000         1.0000          .          
+13        -INF             .             1.0000          .          
+14        -INF             .             1.0000          .          
+
+---- EQU a_wo_can_be_scheduled_only_once  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+a          1.0000         1.0000         1.0000          .          
+b          1.0000         1.0000         1.0000          .          
+c          1.0000         1.0000         1.0000          .          
+da         1.0000         1.0000         1.0000          .          
+db         1.0000         1.0000         1.0000          .          
+dc         1.0000         1.0000         1.0000          .          
+d          1.0000         1.0000         1.0000          .          
+dd         1.0000         1.0000         1.0000          .          
+
+---- EQU a_wo_can_end_only_once  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+a          1.0000         1.0000         1.0000          .          
+b          1.0000         1.0000         1.0000          .          
+c          1.0000         1.0000         1.0000          .          
+da         1.0000         1.0000         1.0000          .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 14
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     EQU a_wo_can_end_only_once  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+db         1.0000         1.0000         1.0000          .          
+dc         1.0000         1.0000         1.0000          .          
+d          1.0000         1.0000         1.0000          .          
+dd         1.0000         1.0000         1.0000          .          
+
+---- EQU one_job_active  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1         -INF            1.0000         1.0000          .          
+2         -INF            1.0000         1.0000          .          
+3         -INF            1.0000         1.0000          .          
+4         -INF            1.0000         1.0000          .          
+5         -INF            1.0000         1.0000          .          
+6         -INF            1.0000         1.0000          .          
+7         -INF            1.0000         1.0000          .          
+8         -INF            1.0000         1.0000          .          
+9         -INF            1.0000         1.0000          .          
+10        -INF            1.0000         1.0000          .          
+11        -INF            1.0000         1.0000          .          
+12        -INF            1.0000         1.0000          .          
+13        -INF             .             1.0000          .          
+14        -INF             .             1.0000          .          
+
+---- EQU start_less_end  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+a         -INF           -2.0000          .              .          
+b         -INF           -2.0000          .              .          
+c         -INF           -2.0000          .              .          
+da        -INF           -1.0000          .              .          
+db        -INF           -1.0000          .              .          
+dc        -INF           -1.0000          .              .          
+d         -INF           -2.0000          .              .          
+dd        -INF           -1.0000          .              .          
+
+---- EQU wo_scheduled_at  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+a           .              .              .             EPS         
+b           .              .              .             EPS         
+c           .              .              .             EPS         
+da          .              .              .             EPS         
+db          .              .              .             EPS         
+dc          .              .              .             EPS         
+d           .              .              .             EPS         
+dd          .              .              .             EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 15
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+---- EQU wo_ended_at  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+a           .              .              .             EPS         
+b           .              .              .             EPS         
+c           .              .              .             EPS         
+da          .              .              .             EPS         
+db          .              .              .             EPS         
+dc          .              .              .             EPS         
+d           .              .              .             EPS         
+dd          .              .              .             EPS         
+
+---- EQU wo_active_eq  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+a .1           .              .              .              .          
+a .2           .              .              .              .          
+a .3           .              .              .              .          
+a .4           .              .              .              .          
+a .5           .              .              .              .          
+a .6           .              .              .              .          
+a .7           .              .              .              .          
+a .8           .              .              .              .          
+a .9           .              .              .              .          
+a .10          .              .              .              .          
+a .11          .              .              .              .          
+a .12          .              .              .              .          
+a .13          .              .              .              .          
+a .14          .              .              .              .          
+b .1           .              .              .              .          
+b .2           .              .              .              .          
+b .3           .              .              .              .          
+b .4           .              .              .              .          
+b .5           .              .              .              .          
+b .6           .              .              .              .          
+b .7           .              .              .              .          
+b .8           .              .              .              .          
+b .9           .              .              .              .          
+b .10          .              .              .              .          
+b .11          .              .              .              .          
+b .12          .              .              .              .          
+b .13          .              .              .              .          
+b .14          .              .              .              .          
+c .1           .              .              .              .          
+c .2           .              .              .              .          
+c .3           .              .              .              .          
+c .4           .              .              .              .          
+c .5           .              .              .              .          
+c .6           .              .              .              .          
+c .7           .              .              .              .          
+c .8           .              .              .              .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 16
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     EQU wo_active_eq  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+c .9           .              .              .              .          
+c .10          .              .              .              .          
+c .11          .              .              .              .          
+c .12          .              .              .              .          
+c .13          .              .              .              .          
+c .14          .              .              .              .          
+da.1           .              .              .              .          
+da.2           .              .              .              .          
+da.3           .              .              .              .          
+da.4           .              .              .              .          
+da.5           .              .              .              .          
+da.6           .              .              .              .          
+da.7           .              .              .              .          
+da.8           .              .              .              .          
+da.9           .              .              .              .          
+da.10          .              .              .              .          
+da.11          .              .              .              .          
+da.12          .              .              .              .          
+da.13          .              .              .              .          
+da.14          .              .              .              .          
+db.1           .              .              .              .          
+db.2           .              .              .              .          
+db.3           .              .              .              .          
+db.4           .              .              .              .          
+db.5           .              .              .              .          
+db.6           .              .              .              .          
+db.7           .              .              .              .          
+db.8           .              .              .              .          
+db.9           .              .              .              .          
+db.10          .              .              .              .          
+db.11          .              .              .              .          
+db.12          .              .              .              .          
+db.13          .              .              .              .          
+db.14          .              .              .              .          
+dc.1           .              .              .              .          
+dc.2           .              .              .              .          
+dc.3           .              .              .              .          
+dc.4           .              .              .              .          
+dc.5           .              .              .              .          
+dc.6           .              .              .              .          
+dc.7           .              .              .              .          
+dc.8           .              .              .              .          
+dc.9           .              .              .              .          
+dc.10          .              .              .              .          
+dc.11          .              .              .              .          
+dc.12          .              .              .              .          
+dc.13          .              .              .              .          
+dc.14          .              .              .              .          
+d .1           .              .              .              .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 17
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     EQU wo_active_eq  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+d .2           .              .              .              .          
+d .3           .              .              .              .          
+d .4           .              .              .              .          
+d .5           .              .              .              .          
+d .6           .              .              .              .          
+d .7           .              .              .              .          
+d .8           .              .              .              .          
+d .9           .              .              .              .          
+d .10          .              .              .              .          
+d .11          .              .              .              .          
+d .12          .              .              .              .          
+d .13          .              .              .              .          
+d .14          .              .              .              .          
+dd.1           .              .              .              .          
+dd.2           .              .              .              .          
+dd.3           .              .              .              .          
+dd.4           .              .              .              .          
+dd.5           .              .              .              .          
+dd.6           .              .              .              .          
+dd.7           .              .              .              .          
+dd.8           .              .              .              .          
+dd.9           .              .              .              .          
+dd.10          .              .              .              .          
+dd.11          .              .              .              .          
+dd.12          .              .              .              .          
+dd.13          .              .              .              .          
+dd.14          .              .              .              .          
+
+---- EQU wo_mem_active_constraint  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+1         -INF          400.0000      1000.0000          .          
+2         -INF          400.0000      1000.0000          .          
+3         -INF             .          1000.0000          .          
+4         -INF          600.0000      1000.0000          .          
+5         -INF          600.0000      1000.0000          .          
+6         -INF             .          1000.0000          .          
+7         -INF          800.0000      1000.0000          .          
+8         -INF          800.0000      1000.0000          .          
+9         -INF             .          1000.0000          .          
+10        -INF          800.0000      1000.0000          .          
+11        -INF          800.0000      1000.0000          .          
+12        -INF             .          1000.0000          .          
+13        -INF             .          1000.0000          .          
+14        -INF             .          1000.0000          .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 18
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+---- EQU wo_mem_active_eq  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+a .1           .              .              .              .          
+a .2           .              .              .              .          
+a .3           .              .              .              .          
+a .4           .              .              .              .          
+a .5           .              .              .              .          
+a .6           .              .              .              .          
+a .7           .              .              .              .          
+a .8           .              .              .              .          
+a .9           .              .              .              .          
+a .10          .              .              .              .          
+a .11          .              .              .              .          
+a .12          .              .              .              .          
+a .13          .              .              .              .          
+a .14          .              .              .              .          
+b .1           .              .              .              .          
+b .2           .              .              .              .          
+b .3           .              .              .              .          
+b .4           .              .              .              .          
+b .5           .              .              .              .          
+b .6           .              .              .              .          
+b .7           .              .              .              .          
+b .8           .              .              .              .          
+b .9           .              .              .              .          
+b .10          .              .              .              .          
+b .11          .              .              .              .          
+b .12          .              .              .              .          
+b .13          .              .              .              .          
+b .14          .              .              .              .          
+c .1           .              .              .              .          
+c .2           .              .              .              .          
+c .3           .              .              .              .          
+c .4           .              .              .              .          
+c .5           .              .              .              .          
+c .6           .              .              .              .          
+c .7           .              .              .              .          
+c .8           .              .              .              .          
+c .9           .              .              .              .          
+c .10          .              .              .              .          
+c .11          .              .              .              .          
+c .12          .              .              .              .          
+c .13          .              .              .              .          
+c .14          .              .              .              .          
+da.1           .              .              .              .          
+da.2           .              .              .              .          
+da.3           .              .              .              .          
+da.4           .              .              .              .          
+da.5           .              .              .              .          
+da.6           .              .              .              .          
+da.7           .              .              .              .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 19
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     EQU wo_mem_active_eq  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+da.8           .              .              .              .          
+da.9           .              .              .              .          
+da.10          .              .              .              .          
+da.11          .              .              .              .          
+da.12          .              .              .              .          
+da.13          .              .              .              .          
+da.14          .              .              .              .          
+db.1           .              .              .              .          
+db.2           .              .              .              .          
+db.3           .              .              .              .          
+db.4           .              .              .              .          
+db.5           .              .              .              .          
+db.6           .              .              .              .          
+db.7           .              .              .              .          
+db.8           .              .              .              .          
+db.9           .              .              .              .          
+db.10          .              .              .              .          
+db.11          .              .              .              .          
+db.12          .              .              .              .          
+db.13          .              .              .              .          
+db.14          .              .              .              .          
+dc.1           .              .              .              .          
+dc.2           .              .              .              .          
+dc.3           .              .              .              .          
+dc.4           .              .              .              .          
+dc.5           .              .              .              .          
+dc.6           .              .              .              .          
+dc.7           .              .              .              .          
+dc.8           .              .              .              .          
+dc.9           .              .              .              .          
+dc.10          .              .              .              .          
+dc.11          .              .              .              .          
+dc.12          .              .              .              .          
+dc.13          .              .              .              .          
+dc.14          .              .              .              .          
+d .1           .              .              .              .          
+d .2           .              .              .              .          
+d .3           .              .              .              .          
+d .4           .              .              .              .          
+d .5           .              .              .              .          
+d .6           .              .              .              .          
+d .7           .              .              .              .          
+d .8           .              .              .              .          
+d .9           .              .              .              .          
+d .10          .              .              .              .          
+d .11          .              .              .              .          
+d .12          .              .              .              .          
+d .13          .              .              .              .          
+d .14          .              .              .              .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 20
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     EQU wo_mem_active_eq  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+dd.1           .              .              .              .          
+dd.2           .              .              .              .          
+dd.3           .              .              .              .          
+dd.4           .              .              .              .          
+dd.5           .              .              .              .          
+dd.6           .              .              .              .          
+dd.7           .              .              .              .          
+dd.8           .              .              .              .          
+dd.9           .              .              .              .          
+dd.10          .              .              .              .          
+dd.11          .              .              .              .          
+dd.12          .              .              .              .          
+dd.13          .              .              .              .          
+dd.14          .              .              .              .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR memory_fo~        -INF         5200.0000        +INF             .          
+
+---- VAR wo_scheduled  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+1 .a           .             1.0000         1.0000      -400.0000      
+1 .b           .              .             1.0000      -600.0000      
+1 .c           .              .             1.0000      -800.0000      
+1 .da          .              .             1.0000       400.0000      
+1 .db          .              .             1.0000       600.0000      
+1 .dc          .              .             1.0000       800.0000      
+1 .d           .              .             1.0000      -800.0000      
+1 .dd          .              .             1.0000       800.0000      
+2 .a           .              .             1.0000      -800.0000      
+2 .b           .              .             1.0000     -1200.0000      
+2 .c           .              .             1.0000     -1600.0000      
+2 .da          .              .             1.0000       800.0000      
+2 .db          .              .             1.0000      1200.0000      
+2 .dc          .              .             1.0000      1600.0000      
+2 .d           .              .             1.0000     -1600.0000      
+2 .dd          .              .             1.0000      1600.0000      
+3 .a           .              .             1.0000     -1200.0000      
+3 .b           .              .             1.0000     -1800.0000      
+3 .c           .              .             1.0000     -2400.0000      
+3 .da          .             1.0000         1.0000      1200.0000      
+3 .db          .              .             1.0000      1800.0000      
+3 .dc          .              .             1.0000      2400.0000      
+3 .d           .              .             1.0000     -2400.0000      
+3 .dd          .              .             1.0000      2400.0000      
+4 .a           .              .             1.0000     -1600.0000      
+4 .b           .             1.0000         1.0000     -2400.0000      
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 21
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     VAR wo_scheduled  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+4 .c           .              .             1.0000     -3200.0000      
+4 .da          .              .             1.0000      1600.0000      
+4 .db          .              .             1.0000      2400.0000      
+4 .dc          .              .             1.0000      3200.0000      
+4 .d           .              .             1.0000     -3200.0000      
+4 .dd          .              .             1.0000      3200.0000      
+5 .a           .              .             1.0000     -2000.0000      
+5 .b           .              .             1.0000     -3000.0000      
+5 .c           .              .             1.0000     -4000.0000      
+5 .da          .              .             1.0000      2000.0000      
+5 .db          .              .             1.0000      3000.0000      
+5 .dc          .              .             1.0000      4000.0000      
+5 .d           .              .             1.0000     -4000.0000      
+5 .dd          .              .             1.0000      4000.0000      
+6 .a           .              .             1.0000     -2400.0000      
+6 .b           .              .             1.0000     -3600.0000      
+6 .c           .              .             1.0000     -4800.0000      
+6 .da          .              .             1.0000      2400.0000      
+6 .db          .             1.0000         1.0000      3600.0000      
+6 .dc          .              .             1.0000      4800.0000      
+6 .d           .              .             1.0000     -4800.0000      
+6 .dd          .              .             1.0000      4800.0000      
+7 .a           .              .             1.0000     -2800.0000      
+7 .b           .              .             1.0000     -4200.0000      
+7 .c           .             1.0000         1.0000     -5600.0000      
+7 .da          .              .             1.0000      2800.0000      
+7 .db          .              .             1.0000      4200.0000      
+7 .dc          .              .             1.0000      5600.0000      
+7 .d           .              .             1.0000     -5600.0000      
+7 .dd          .              .             1.0000      5600.0000      
+8 .a           .              .             1.0000     -3200.0000      
+8 .b           .              .             1.0000     -4800.0000      
+8 .c           .              .             1.0000     -6400.0000      
+8 .da          .              .             1.0000      3200.0000      
+8 .db          .              .             1.0000      4800.0000      
+8 .dc          .              .             1.0000      6400.0000      
+8 .d           .              .             1.0000     -6400.0000      
+8 .dd          .              .             1.0000      6400.0000      
+9 .a           .              .             1.0000     -3600.0000      
+9 .b           .              .             1.0000     -5400.0000      
+9 .c           .              .             1.0000     -7200.0000      
+9 .da          .              .             1.0000      3600.0000      
+9 .db          .              .             1.0000      5400.0000      
+9 .dc          .             1.0000         1.0000      7200.0000      
+9 .d           .              .             1.0000     -7200.0000      
+9 .dd          .              .             1.0000      7200.0000      
+10.a           .              .             1.0000     -4000.0000      
+10.b           .              .             1.0000     -6000.0000      
+10.c           .              .             1.0000     -8000.0000      
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 22
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     VAR wo_scheduled  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+10.da          .              .             1.0000      4000.0000      
+10.db          .              .             1.0000      6000.0000      
+10.dc          .              .             1.0000      8000.0000      
+10.d           .             1.0000         1.0000     -8000.0000      
+10.dd          .              .             1.0000      8000.0000      
+11.a           .              .             1.0000     -4400.0000      
+11.b           .              .             1.0000     -6600.0000      
+11.c           .              .             1.0000     -8800.0000      
+11.da          .              .             1.0000      4400.0000      
+11.db          .              .             1.0000      6600.0000      
+11.dc          .              .             1.0000      8800.0000      
+11.d           .              .             1.0000     -8800.0000      
+11.dd          .              .             1.0000      8800.0000      
+12.a           .              .             1.0000     -4800.0000      
+12.b           .              .             1.0000     -7200.0000      
+12.c           .              .             1.0000     -9600.0000      
+12.da          .              .             1.0000      4800.0000      
+12.db          .              .             1.0000      7200.0000      
+12.dc          .              .             1.0000      9600.0000      
+12.d           .              .             1.0000     -9600.0000      
+12.dd          .             1.0000         1.0000      9600.0000      
+13.a           .              .             1.0000     -5200.0000      
+13.b           .              .             1.0000     -7800.0000      
+13.c           .              .             1.0000    -10400.0000      
+13.da          .              .             1.0000      5200.0000      
+13.db          .              .             1.0000      7800.0000      
+13.dc          .              .             1.0000     10400.0000      
+13.d           .              .             1.0000    -10400.0000      
+13.dd          .              .             1.0000     10400.0000      
+14.a           .              .             1.0000     -5600.0000      
+14.b           .              .             1.0000     -8400.0000      
+14.c           .              .             1.0000    -11200.0000      
+14.da          .              .             1.0000      5600.0000      
+14.db          .              .             1.0000      8400.0000      
+14.dc          .              .             1.0000     11200.0000      
+14.d           .              .             1.0000    -11200.0000      
+14.dd          .              .             1.0000     11200.0000      
+
+---- VAR wo_ended  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+1 .a           .              .             1.0000         EPS         
+1 .b           .              .             1.0000         EPS         
+1 .c           .              .             1.0000         EPS         
+1 .da          .              .             1.0000         EPS         
+1 .db          .              .             1.0000         EPS         
+1 .dc          .              .             1.0000         EPS         
+1 .d           .              .             1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 23
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     VAR wo_ended  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+1 .dd          .              .             1.0000         EPS         
+2 .a           .              .             1.0000         EPS         
+2 .b           .              .             1.0000         EPS         
+2 .c           .              .             1.0000         EPS         
+2 .da          .              .             1.0000         EPS         
+2 .db          .              .             1.0000         EPS         
+2 .dc          .              .             1.0000         EPS         
+2 .d           .              .             1.0000         EPS         
+2 .dd          .              .             1.0000         EPS         
+3 .a           .             1.0000         1.0000         EPS         
+3 .b           .              .             1.0000         EPS         
+3 .c           .              .             1.0000         EPS         
+3 .da          .              .             1.0000         EPS         
+3 .db          .              .             1.0000         EPS         
+3 .dc          .              .             1.0000         EPS         
+3 .d           .              .             1.0000         EPS         
+3 .dd          .              .             1.0000         EPS         
+4 .a           .              .             1.0000         EPS         
+4 .b           .              .             1.0000         EPS         
+4 .c           .              .             1.0000         EPS         
+4 .da          .             1.0000         1.0000         EPS         
+4 .db          .              .             1.0000         EPS         
+4 .dc          .              .             1.0000         EPS         
+4 .d           .              .             1.0000         EPS         
+4 .dd          .              .             1.0000         EPS         
+5 .a           .              .             1.0000         EPS         
+5 .b           .              .             1.0000         EPS         
+5 .c           .              .             1.0000         EPS         
+5 .da          .              .             1.0000         EPS         
+5 .db          .              .             1.0000         EPS         
+5 .dc          .              .             1.0000         EPS         
+5 .d           .              .             1.0000         EPS         
+5 .dd          .              .             1.0000         EPS         
+6 .a           .              .             1.0000         EPS         
+6 .b           .             1.0000         1.0000         EPS         
+6 .c           .              .             1.0000         EPS         
+6 .da          .              .             1.0000         EPS         
+6 .db          .              .             1.0000         EPS         
+6 .dc          .              .             1.0000         EPS         
+6 .d           .              .             1.0000         EPS         
+6 .dd          .              .             1.0000         EPS         
+7 .a           .              .             1.0000         EPS         
+7 .b           .              .             1.0000         EPS         
+7 .c           .              .             1.0000         EPS         
+7 .da          .              .             1.0000         EPS         
+7 .db          .             1.0000         1.0000         EPS         
+7 .dc          .              .             1.0000         EPS         
+7 .d           .              .             1.0000         EPS         
+7 .dd          .              .             1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 24
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     VAR wo_ended  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+8 .a           .              .             1.0000         EPS         
+8 .b           .              .             1.0000         EPS         
+8 .c           .              .             1.0000         EPS         
+8 .da          .              .             1.0000         EPS         
+8 .db          .              .             1.0000         EPS         
+8 .dc          .              .             1.0000         EPS         
+8 .d           .              .             1.0000         EPS         
+8 .dd          .              .             1.0000         EPS         
+9 .a           .              .             1.0000         EPS         
+9 .b           .              .             1.0000         EPS         
+9 .c           .             1.0000         1.0000         EPS         
+9 .da          .              .             1.0000         EPS         
+9 .db          .              .             1.0000         EPS         
+9 .dc          .              .             1.0000         EPS         
+9 .d           .              .             1.0000         EPS         
+9 .dd          .              .             1.0000         EPS         
+10.a           .              .             1.0000         EPS         
+10.b           .              .             1.0000         EPS         
+10.c           .              .             1.0000         EPS         
+10.da          .              .             1.0000         EPS         
+10.db          .              .             1.0000         EPS         
+10.dc          .             1.0000         1.0000         EPS         
+10.d           .              .             1.0000         EPS         
+10.dd          .              .             1.0000         EPS         
+11.a           .              .             1.0000         EPS         
+11.b           .              .             1.0000         EPS         
+11.c           .              .             1.0000         EPS         
+11.da          .              .             1.0000         EPS         
+11.db          .              .             1.0000         EPS         
+11.dc          .              .             1.0000         EPS         
+11.d           .              .             1.0000         EPS         
+11.dd          .              .             1.0000         EPS         
+12.a           .              .             1.0000         EPS         
+12.b           .              .             1.0000         EPS         
+12.c           .              .             1.0000         EPS         
+12.da          .              .             1.0000         EPS         
+12.db          .              .             1.0000         EPS         
+12.dc          .              .             1.0000         EPS         
+12.d           .             1.0000         1.0000         EPS         
+12.dd          .              .             1.0000         EPS         
+13.a           .              .             1.0000         EPS         
+13.b           .              .             1.0000         EPS         
+13.c           .              .             1.0000         EPS         
+13.da          .              .             1.0000         EPS         
+13.db          .              .             1.0000         EPS         
+13.dc          .              .             1.0000         EPS         
+13.d           .              .             1.0000         EPS         
+13.dd          .             1.0000         1.0000         EPS         
+14.a           .              .             1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 25
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     VAR wo_ended  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+14.b           .              .             1.0000         EPS         
+14.c           .              .             1.0000         EPS         
+14.da          .              .             1.0000         EPS         
+14.db          .              .             1.0000         EPS         
+14.dc          .              .             1.0000         EPS         
+14.d           .              .             1.0000         EPS         
+14.dd          .              .             1.0000         EPS         
+
+---- VAR wo_active  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+1 .a           .             1.0000         1.0000         EPS         
+1 .b           .              .             1.0000         EPS         
+1 .c           .              .             1.0000         EPS         
+1 .da          .              .             1.0000         EPS         
+1 .db          .              .             1.0000         EPS         
+1 .dc          .              .             1.0000         EPS         
+1 .d           .              .             1.0000         EPS         
+1 .dd          .              .             1.0000         EPS         
+2 .a           .             1.0000         1.0000         EPS         
+2 .b           .              .             1.0000         EPS         
+2 .c           .              .             1.0000         EPS         
+2 .da          .              .             1.0000         EPS         
+2 .db          .              .             1.0000         EPS         
+2 .dc          .              .             1.0000         EPS         
+2 .d           .              .             1.0000         EPS         
+2 .dd          .              .             1.0000         EPS         
+3 .a           .              .             1.0000         EPS         
+3 .b           .              .             1.0000         EPS         
+3 .c           .              .             1.0000         EPS         
+3 .da          .             1.0000         1.0000         EPS         
+3 .db          .              .             1.0000         EPS         
+3 .dc          .              .             1.0000         EPS         
+3 .d           .              .             1.0000         EPS         
+3 .dd          .              .             1.0000         EPS         
+4 .a           .              .             1.0000         EPS         
+4 .b           .             1.0000         1.0000         EPS         
+4 .c           .              .             1.0000         EPS         
+4 .da          .              .             1.0000         EPS         
+4 .db          .              .             1.0000         EPS         
+4 .dc          .              .             1.0000         EPS         
+4 .d           .              .             1.0000         EPS         
+4 .dd          .              .             1.0000         EPS         
+5 .a           .              .             1.0000         EPS         
+5 .b           .             1.0000         1.0000         EPS         
+5 .c           .              .             1.0000         EPS         
+5 .da          .              .             1.0000         EPS         
+5 .db          .              .             1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 26
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     VAR wo_active  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+5 .dc          .              .             1.0000         EPS         
+5 .d           .              .             1.0000         EPS         
+5 .dd          .              .             1.0000         EPS         
+6 .a           .              .             1.0000         EPS         
+6 .b           .              .             1.0000         EPS         
+6 .c           .              .             1.0000         EPS         
+6 .da          .              .             1.0000         EPS         
+6 .db          .             1.0000         1.0000         EPS         
+6 .dc          .              .             1.0000         EPS         
+6 .d           .              .             1.0000         EPS         
+6 .dd          .              .             1.0000         EPS         
+7 .a           .              .             1.0000         EPS         
+7 .b           .              .             1.0000         EPS         
+7 .c           .             1.0000         1.0000         EPS         
+7 .da          .              .             1.0000         EPS         
+7 .db          .              .             1.0000         EPS         
+7 .dc          .              .             1.0000         EPS         
+7 .d           .              .             1.0000         EPS         
+7 .dd          .              .             1.0000         EPS         
+8 .a           .              .             1.0000         EPS         
+8 .b           .              .             1.0000         EPS         
+8 .c           .             1.0000         1.0000         EPS         
+8 .da          .              .             1.0000         EPS         
+8 .db          .              .             1.0000         EPS         
+8 .dc          .              .             1.0000         EPS         
+8 .d           .              .             1.0000         EPS         
+8 .dd          .              .             1.0000         EPS         
+9 .a           .              .             1.0000         EPS         
+9 .b           .              .             1.0000         EPS         
+9 .c           .              .             1.0000         EPS         
+9 .da          .              .             1.0000         EPS         
+9 .db          .              .             1.0000         EPS         
+9 .dc          .             1.0000         1.0000         EPS         
+9 .d           .              .             1.0000         EPS         
+9 .dd          .              .             1.0000         EPS         
+10.a           .              .             1.0000         EPS         
+10.b           .              .             1.0000         EPS         
+10.c           .              .             1.0000         EPS         
+10.da          .              .             1.0000         EPS         
+10.db          .              .             1.0000         EPS         
+10.dc          .              .             1.0000         EPS         
+10.d           .             1.0000         1.0000         EPS         
+10.dd          .              .             1.0000         EPS         
+11.a           .              .             1.0000         EPS         
+11.b           .              .             1.0000         EPS         
+11.c           .              .             1.0000         EPS         
+11.da          .              .             1.0000         EPS         
+11.db          .              .             1.0000         EPS         
+11.dc          .              .             1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 27
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     VAR wo_active  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+11.d           .             1.0000         1.0000         EPS         
+11.dd          .              .             1.0000         EPS         
+12.a           .              .             1.0000         EPS         
+12.b           .              .             1.0000         EPS         
+12.c           .              .             1.0000         EPS         
+12.da          .              .             1.0000         EPS         
+12.db          .              .             1.0000         EPS         
+12.dc          .              .             1.0000         EPS         
+12.d           .              .             1.0000         EPS         
+12.dd          .             1.0000         1.0000         EPS         
+13.a           .              .             1.0000         EPS         
+13.b           .              .             1.0000         EPS         
+13.c           .              .             1.0000         EPS         
+13.da          .              .             1.0000         EPS         
+13.db          .              .             1.0000         EPS         
+13.dc          .              .             1.0000         EPS         
+13.d           .              .             1.0000         EPS         
+13.dd          .              .             1.0000         EPS         
+14.a           .              .             1.0000         EPS         
+14.b           .              .             1.0000         EPS         
+14.c           .              .             1.0000         EPS         
+14.da          .              .             1.0000         EPS         
+14.db          .              .             1.0000         EPS         
+14.dc          .              .             1.0000         EPS         
+14.d           .              .             1.0000         EPS         
+14.dd          .              .             1.0000         EPS         
+
+---- VAR wo_mem_active  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+1 .a           .             1.0000         1.0000         EPS         
+1 .b           .              .             1.0000         EPS         
+1 .c           .              .             1.0000         EPS         
+1 .da          .              .             1.0000         EPS         
+1 .db          .              .             1.0000         EPS         
+1 .dc          .              .             1.0000         EPS         
+1 .d           .              .             1.0000         EPS         
+1 .dd          .              .             1.0000         EPS         
+2 .a           .             1.0000         1.0000         EPS         
+2 .b           .              .             1.0000         EPS         
+2 .c           .              .             1.0000         EPS         
+2 .da          .              .             1.0000         EPS         
+2 .db          .              .             1.0000         EPS         
+2 .dc          .              .             1.0000         EPS         
+2 .d           .              .             1.0000         EPS         
+2 .dd          .              .             1.0000         EPS         
+3 .a           .             1.0000         1.0000         EPS         
+3 .b           .              .             1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 28
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     VAR wo_mem_active  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+3 .c           .              .             1.0000         EPS         
+3 .da          .             1.0000         1.0000         EPS         
+3 .db          .              .             1.0000         EPS         
+3 .dc          .              .             1.0000         EPS         
+3 .d           .              .             1.0000         EPS         
+3 .dd          .              .             1.0000         EPS         
+4 .a           .             1.0000         1.0000         EPS         
+4 .b           .             1.0000         1.0000         EPS         
+4 .c           .              .             1.0000         EPS         
+4 .da          .             1.0000         1.0000         EPS         
+4 .db          .              .             1.0000         EPS         
+4 .dc          .              .             1.0000         EPS         
+4 .d           .              .             1.0000         EPS         
+4 .dd          .              .             1.0000         EPS         
+5 .a           .             1.0000         1.0000         EPS         
+5 .b           .             1.0000         1.0000         EPS         
+5 .c           .              .             1.0000         EPS         
+5 .da          .             1.0000         1.0000         EPS         
+5 .db          .              .             1.0000         EPS         
+5 .dc          .              .             1.0000         EPS         
+5 .d           .              .             1.0000         EPS         
+5 .dd          .              .             1.0000         EPS         
+6 .a           .             1.0000         1.0000         EPS         
+6 .b           .             1.0000         1.0000         EPS         
+6 .c           .              .             1.0000         EPS         
+6 .da          .             1.0000         1.0000         EPS         
+6 .db          .             1.0000         1.0000         EPS         
+6 .dc          .              .             1.0000         EPS         
+6 .d           .              .             1.0000         EPS         
+6 .dd          .              .             1.0000         EPS         
+7 .a           .             1.0000         1.0000         EPS         
+7 .b           .             1.0000         1.0000         EPS         
+7 .c           .             1.0000         1.0000         EPS         
+7 .da          .             1.0000         1.0000         EPS         
+7 .db          .             1.0000         1.0000         EPS         
+7 .dc          .              .             1.0000         EPS         
+7 .d           .              .             1.0000         EPS         
+7 .dd          .              .             1.0000         EPS         
+8 .a           .             1.0000         1.0000         EPS         
+8 .b           .             1.0000         1.0000         EPS         
+8 .c           .             1.0000         1.0000         EPS         
+8 .da          .             1.0000         1.0000         EPS         
+8 .db          .             1.0000         1.0000         EPS         
+8 .dc          .              .             1.0000         EPS         
+8 .d           .              .             1.0000         EPS         
+8 .dd          .              .             1.0000         EPS         
+9 .a           .             1.0000         1.0000         EPS         
+9 .b           .             1.0000         1.0000         EPS         
+9 .c           .             1.0000         1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 29
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+     VAR wo_mem_active  
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+9 .da          .             1.0000         1.0000         EPS         
+9 .db          .             1.0000         1.0000         EPS         
+9 .dc          .             1.0000         1.0000         EPS         
+9 .d           .              .             1.0000         EPS         
+9 .dd          .              .             1.0000         EPS         
+10.a           .             1.0000         1.0000         EPS         
+10.b           .             1.0000         1.0000         EPS         
+10.c           .             1.0000         1.0000         EPS         
+10.da          .             1.0000         1.0000         EPS         
+10.db          .             1.0000         1.0000         EPS         
+10.dc          .             1.0000         1.0000         EPS         
+10.d           .             1.0000         1.0000         EPS         
+10.dd          .              .             1.0000         EPS         
+11.a           .             1.0000         1.0000         EPS         
+11.b           .             1.0000         1.0000         EPS         
+11.c           .             1.0000         1.0000         EPS         
+11.da          .             1.0000         1.0000         EPS         
+11.db          .             1.0000         1.0000         EPS         
+11.dc          .             1.0000         1.0000         EPS         
+11.d           .             1.0000         1.0000         EPS         
+11.dd          .              .             1.0000         EPS         
+12.a           .             1.0000         1.0000         EPS         
+12.b           .             1.0000         1.0000         EPS         
+12.c           .             1.0000         1.0000         EPS         
+12.da          .             1.0000         1.0000         EPS         
+12.db          .             1.0000         1.0000         EPS         
+12.dc          .             1.0000         1.0000         EPS         
+12.d           .             1.0000         1.0000         EPS         
+12.dd          .             1.0000         1.0000         EPS         
+13.a           .             1.0000         1.0000         EPS         
+13.b           .             1.0000         1.0000         EPS         
+13.c           .             1.0000         1.0000         EPS         
+13.da          .             1.0000         1.0000         EPS         
+13.db          .             1.0000         1.0000         EPS         
+13.dc          .             1.0000         1.0000         EPS         
+13.d           .             1.0000         1.0000         EPS         
+13.dd          .             1.0000         1.0000         EPS         
+14.a           .             1.0000         1.0000         EPS         
+14.b           .             1.0000         1.0000         EPS         
+14.c           .             1.0000         1.0000         EPS         
+14.da          .             1.0000         1.0000         EPS         
+14.db          .             1.0000         1.0000         EPS         
+14.dc          .             1.0000         1.0000         EPS         
+14.d           .             1.0000         1.0000         EPS         
+14.dd          .             1.0000         1.0000         EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 30
+Single Machine Schedling
+Solution Report     SOLVE scheduling Using MIP From line 115
+
+
+---- VAR start  time work order I starts
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+a           .             1.0000        +INF             .          
+b           .             4.0000        +INF             .          
+c           .             7.0000        +INF             .          
+da          .             3.0000        +INF             .          
+db          .             6.0000        +INF             .          
+dc          .             9.0000        +INF             .          
+d           .            10.0000        +INF             .          
+dd          .            12.0000        +INF             .          
+
+---- VAR end  time work order I ends
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+a           .             3.0000        +INF             .          
+b           .             6.0000        +INF             .          
+c           .             9.0000        +INF             .          
+da          .             4.0000        +INF             .          
+db          .             7.0000        +INF             .          
+dc          .            10.0000        +INF             .          
+d           .            12.0000        +INF             .          
+dd          .            13.0000        +INF             .          
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 31
+Single Machine Schedling
+E x e c u t i o n
+
+
+----    116 VARIABLE memory_footprint.L    =     5200.000  
+
+----    117 VARIABLE start.L  time work order I starts
+
+a   1.000,    b   4.000,    c   7.000,    da  3.000,    db  6.000,    dc  9.000,    d  10.000,    dd 12.000
+
+
+----    118 VARIABLE wo_scheduled.L  
+
+             a           b           c          da          db          dc           d          dd
+
+1        1.000
+3                                            1.000
+4                    1.000
+6                                                        1.000
+7                                1.000
+9                                                                    1.000
+10                                                                               1.000
+12                                                                                           1.000
+
+
+----    119 VARIABLE wo_ended.L  
+
+             a           b           c          da          db          dc           d          dd
+
+3        1.000
+4                                            1.000
+6                    1.000
+7                                                        1.000
+9                                1.000
+10                                                                   1.000
+12                                                                               1.000
+13                                                                                           1.000
+
+
+----    120 VARIABLE wo_active.L  
+
+             a           b           c          da          db          dc           d          dd
+
+1        1.000
+2        1.000
+3                                            1.000
+4                    1.000
+5                    1.000
+6                                                        1.000
+7                                1.000
+8                                1.000
+9                                                                    1.000
+10                                                                               1.000
+11                                                                               1.000
+12                                                                                           1.000
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/16/16 13:51:46 Page 32
+Single Machine Schedling
+E x e c u t i o n
+
+
+----    121 VARIABLE wo_mem_active.L  
+
+             a           b           c          da          db          dc           d          dd
+
+1        1.000
+2        1.000
+3        1.000                               1.000
+4        1.000       1.000                   1.000
+5        1.000       1.000                   1.000
+6        1.000       1.000                   1.000       1.000
+7        1.000       1.000       1.000       1.000       1.000
+8        1.000       1.000       1.000       1.000       1.000
+9        1.000       1.000       1.000       1.000       1.000       1.000
+10       1.000       1.000       1.000       1.000       1.000       1.000       1.000
+11       1.000       1.000       1.000       1.000       1.000       1.000       1.000
+12       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000
+13       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000
+14       1.000       1.000       1.000       1.000       1.000       1.000       1.000       1.000
+
+
+
+EXECUTION TIME       =        0.005 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+
+
+USER: CS 524 Course License                          G160914/0001AS-GEN
+      Prof. Ferris, UW-Madison, Fall 2016                        DC2937
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/quickstep/Documents/CS524/tostud/single_core_scheduling.gms
+Output     /Users/quickstep/Documents/CS524/tostud/single_core_scheduling.lst

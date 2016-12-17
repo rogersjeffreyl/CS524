@@ -1,0 +1,554 @@
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 15:31:13 Page 1
+Sequencing on a single machine (Xpress Models: pp 128-132)
+C o m p i l a t i o n
+
+
+   2   
+      A set of tasks is to be processed on a single machine.
+      The execution of the tasks is non-preemptive (ie cannot be interrupted).
+      For every task i its release date, duration and due date are given.
+       
+      What is the sequence that minimizes the maximum tardiness?
+       
+      This formulation uses rank with sos1 variables
+  12   
+  13  set job / 1*7 /;
+  14  set times /release,duration,due/;
+  15   
+  16  table data(times,job)
+  17                  1       2       3       4       5       6       7
+  18  release         2       5       4                       8       9
+  19  duration        5       6       8       4       2       4       2
+  20  due             10      21      15      10      5       15      22
+  21  ;
+  22   
+  23  alias (job,j);
+  24  set k 'position' / p1*p7 /;
+  25   
+  26  sos1 variable rank(j,k) "job j has position k";
+  27  positive variables start(k) "start time of job in position k";
+  28  positive variables comp(k) "completion time of job in position k";
+  29  positive variables tard(k) "tardiness of job in position k";
+  30  variable tardiness;
+  31   
+  32  equations
+  33    oneInPosition(k),
+  34    oneRankPer(j),
+  35    defstart(k),
+  36    defcomp(k),
+  37    precedence(k),
+  38    deftard(k),
+  39    deftardiness(k);
+  40   
+  41  oneInPosition(k)..
+  42    sum(j,rank(j,k)) =e= 1;
+  43   
+  44  oneRankPer(j)..
+  45    sum(k,rank(j,k)) =e= 1;
+  46   
+  47  defstart(k)..
+  48    start(k) =g= sum(j,data('release',j)*rank(j,k));
+  49   
+  50  defcomp(k)..
+  51    comp(k) =e= start(k) + sum(j,data('duration',j)*rank(j,k));
+  52   
+  53  precedence(k)$(ord(k) lt card(k))..
+  54    start(k+1) =g= comp(k);
+  55   
+  56  * This is really max(0, comp(k) - sum(j,...))
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 15:31:13 Page 2
+Sequencing on a single machine (Xpress Models: pp 128-132)
+C o m p i l a t i o n
+
+
+  57  deftard(k)..
+  58    tard(k) =g= comp(k) - sum(j,data('due',j)*rank(j,k));
+  59   
+  60  deftardiness(k)..
+  61    tardiness =g= tard(k);
+  62   
+  63  model sequence /all/;
+  64  sequence.optcr = 0;
+  65  solve sequence using mip min tardiness;
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 15:31:13 Page 3
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Equation Listing    SOLVE sequence Using MIP From line 65
+
+
+---- oneInPosition  =E=  
+
+oneInPosition(p1)..  rank(1,p1) + rank(2,p1) + rank(3,p1) + rank(4,p1) + rank(5,p1) + rank(6,p1) + rank(7,p1) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+oneInPosition(p2)..  rank(1,p2) + rank(2,p2) + rank(3,p2) + rank(4,p2) + rank(5,p2) + rank(6,p2) + rank(7,p2) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+oneInPosition(p3)..  rank(1,p3) + rank(2,p3) + rank(3,p3) + rank(4,p3) + rank(5,p3) + rank(6,p3) + rank(7,p3) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+REMAINING 4 ENTRIES SKIPPED
+
+
+---- oneRankPer  =E=  
+
+oneRankPer(1)..  rank(1,p1) + rank(1,p2) + rank(1,p3) + rank(1,p4) + rank(1,p5) + rank(1,p6) + rank(1,p7) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+oneRankPer(2)..  rank(2,p1) + rank(2,p2) + rank(2,p3) + rank(2,p4) + rank(2,p5) + rank(2,p6) + rank(2,p7) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+oneRankPer(3)..  rank(3,p1) + rank(3,p2) + rank(3,p3) + rank(3,p4) + rank(3,p5) + rank(3,p6) + rank(3,p7) =E= 1 ; (LHS = 0, INFES = 1 ****)
+     
+REMAINING 4 ENTRIES SKIPPED
+
+
+---- defstart  =G=  
+
+defstart(p1)..  - 2*rank(1,p1) - 5*rank(2,p1) - 4*rank(3,p1) - 8*rank(6,p1) - 9*rank(7,p1) + start(p1) =G= 0 ; (LHS = 0)
+     
+defstart(p2)..  - 2*rank(1,p2) - 5*rank(2,p2) - 4*rank(3,p2) - 8*rank(6,p2) - 9*rank(7,p2) + start(p2) =G= 0 ; (LHS = 0)
+     
+defstart(p3)..  - 2*rank(1,p3) - 5*rank(2,p3) - 4*rank(3,p3) - 8*rank(6,p3) - 9*rank(7,p3) + start(p3) =G= 0 ; (LHS = 0)
+     
+REMAINING 4 ENTRIES SKIPPED
+
+
+---- defcomp  =E=  
+
+defcomp(p1)..  - 5*rank(1,p1) - 6*rank(2,p1) - 8*rank(3,p1) - 4*rank(4,p1) - 2*rank(5,p1) - 4*rank(6,p1) - 2*rank(7,p1) - start(p1) + comp(p1) =E= 0 ; (LHS = 0)
+     
+defcomp(p2)..  - 5*rank(1,p2) - 6*rank(2,p2) - 8*rank(3,p2) - 4*rank(4,p2) - 2*rank(5,p2) - 4*rank(6,p2) - 2*rank(7,p2) - start(p2) + comp(p2) =E= 0 ; (LHS = 0)
+     
+defcomp(p3)..  - 5*rank(1,p3) - 6*rank(2,p3) - 8*rank(3,p3) - 4*rank(4,p3) - 2*rank(5,p3) - 4*rank(6,p3) - 2*rank(7,p3) - start(p3) + comp(p3) =E= 0 ; (LHS = 0)
+     
+REMAINING 4 ENTRIES SKIPPED
+
+
+---- precedence  =G=  
+
+precedence(p1)..  start(p2) - comp(p1) =G= 0 ; (LHS = 0)
+     
+precedence(p2)..  start(p3) - comp(p2) =G= 0 ; (LHS = 0)
+     
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 15:31:13 Page 4
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Equation Listing    SOLVE sequence Using MIP From line 65
+
+
+     precedence  =G=  
+
+precedence(p3)..  start(p4) - comp(p3) =G= 0 ; (LHS = 0)
+     
+REMAINING 3 ENTRIES SKIPPED
+
+
+---- deftard  =G=  
+
+deftard(p1)..  10*rank(1,p1) + 21*rank(2,p1) + 15*rank(3,p1) + 10*rank(4,p1) + 5*rank(5,p1) + 15*rank(6,p1) + 22*rank(7,p1) - comp(p1) + tard(p1) =G= 0 ; (LHS = 0)
+     
+deftard(p2)..  10*rank(1,p2) + 21*rank(2,p2) + 15*rank(3,p2) + 10*rank(4,p2) + 5*rank(5,p2) + 15*rank(6,p2) + 22*rank(7,p2) - comp(p2) + tard(p2) =G= 0 ; (LHS = 0)
+     
+deftard(p3)..  10*rank(1,p3) + 21*rank(2,p3) + 15*rank(3,p3) + 10*rank(4,p3) + 5*rank(5,p3) + 15*rank(6,p3) + 22*rank(7,p3) - comp(p3) + tard(p3) =G= 0 ; (LHS = 0)
+     
+REMAINING 4 ENTRIES SKIPPED
+
+
+---- deftardiness  =G=  
+
+deftardiness(p1)..  - tard(p1) + tardiness =G= 0 ; (LHS = 0)
+     
+deftardiness(p2)..  - tard(p2) + tardiness =G= 0 ; (LHS = 0)
+     
+deftardiness(p3)..  - tard(p3) + tardiness =G= 0 ; (LHS = 0)
+     
+REMAINING 4 ENTRIES SKIPPED
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 15:31:13 Page 5
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Column Listing      SOLVE sequence Using MIP From line 65
+
+
+---- rank  job j has position k
+
+rank(1,p1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       oneInPosition(p1)
+        1       oneRankPer(1)
+       -2       defstart(p1)
+       -5       defcomp(p1)
+       10       deftard(p1)
+
+rank(1,p2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       oneInPosition(p2)
+        1       oneRankPer(1)
+       -2       defstart(p2)
+       -5       defcomp(p2)
+       10       deftard(p2)
+
+rank(1,p3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       oneInPosition(p3)
+        1       oneRankPer(1)
+       -2       defstart(p3)
+       -5       defcomp(p3)
+       10       deftard(p3)
+
+REMAINING 46 ENTRIES SKIPPED
+
+---- start  start time of job in position k
+
+start(p1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       defstart(p1)
+       -1       defcomp(p1)
+
+start(p2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       defstart(p2)
+       -1       defcomp(p2)
+        1       precedence(p1)
+
+start(p3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       defstart(p3)
+       -1       defcomp(p3)
+        1       precedence(p2)
+
+REMAINING 4 ENTRIES SKIPPED
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 15:31:13 Page 6
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Column Listing      SOLVE sequence Using MIP From line 65
+
+
+---- comp  completion time of job in position k
+
+comp(p1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       defcomp(p1)
+       -1       precedence(p1)
+       -1       deftard(p1)
+
+comp(p2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       defcomp(p2)
+       -1       precedence(p2)
+       -1       deftard(p2)
+
+comp(p3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       defcomp(p3)
+       -1       precedence(p3)
+       -1       deftard(p3)
+
+REMAINING 4 ENTRIES SKIPPED
+
+---- tard  tardiness of job in position k
+
+tard(p1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       deftard(p1)
+       -1       deftardiness(p1)
+
+tard(p2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       deftard(p2)
+       -1       deftardiness(p2)
+
+tard(p3)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       deftard(p3)
+       -1       deftardiness(p3)
+
+REMAINING 4 ENTRIES SKIPPED
+
+---- tardiness  
+
+tardiness
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       deftardiness(p1)
+        1       deftardiness(p2)
+        1       deftardiness(p3)
+        1       deftardiness(p4)
+        1       deftardiness(p5)
+        1       deftardiness(p6)
+        1       deftardiness(p7)
+
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 15:31:13 Page 7
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Model Statistics    SOLVE sequence Using MIP From line 65
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           7     SINGLE EQUATIONS           48
+BLOCKS OF VARIABLES           5     SINGLE VARIABLES           71
+NON ZERO ELEMENTS           292
+
+
+GENERATION TIME      =        0.005 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+
+
+EXECUTION TIME       =        0.005 SECONDS      4 MB  24.7.4 r58773 DEX-DEG
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 15:31:13 Page 8
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Solution Report     SOLVE sequence Using MIP From line 65
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   sequence            OBJECTIVE  tardiness
+     TYPE    MIP                 DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  65
+
+**** SOLVER STATUS     1 Normal Completion         
+**** MODEL STATUS      1 Optimal                   
+**** OBJECTIVE VALUE                9.0000
+
+ RESOURCE USAGE, LIMIT          0.013      1000.000
+ ITERATION COUNT, LIMIT        40    2000000000
+
+IBM ILOG CPLEX   24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
+Cplex 12.6.3.0
+
+Space for names approximately 0.00 Mb
+Use option 'names no' to turn use of names off
+MIP status(101): integer optimal solution
+Cplex Time: 0.01sec (det. 1.93 ticks)
+Fixing integer variables, and solving final LP...
+Fixed MIP status(1): optimal
+Cplex Time: 0.00sec (det. 0.06 ticks)
+Proven optimal solution.
+
+MIP Solution:            9.000000    (40 iterations, 0 nodes)
+Final Solve:             9.000000    (0 iterations)
+
+Best possible:           9.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+---- EQU oneInPosition  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p1         1.0000         1.0000         1.0000         4.0000      
+p2         1.0000         1.0000         1.0000         5.0000      
+p3         1.0000         1.0000         1.0000         2.0000      
+p4         1.0000         1.0000         1.0000         4.0000      
+p5         1.0000         1.0000         1.0000         8.0000      
+p6         1.0000         1.0000         1.0000         6.0000      
+p7         1.0000         1.0000         1.0000       -20.0000      
+
+---- EQU oneRankPer  
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1         1.0000         1.0000         1.0000          .          
+2         1.0000         1.0000         1.0000          .          
+3         1.0000         1.0000         1.0000          .          
+4         1.0000         1.0000         1.0000          .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/15/16 15:31:13 Page 9
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Solution Report     SOLVE sequence Using MIP From line 65
+
+
+     EQU oneRankPer  
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+5         1.0000         1.0000         1.0000          .          
+6         1.0000         1.0000         1.0000          .          
+7         1.0000         1.0000         1.0000          .          
+
+---- EQU defstart  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p1          .              .            +INF             .          
+p2          .             2.0000        +INF             .          
+p3          .             9.0000        +INF             .          
+p4          .             3.0000        +INF             .          
+p5          .            11.0000        +INF             .          
+p6          .            18.0000        +INF             .          
+p7          .            20.0000        +INF             .          
+
+---- EQU defcomp  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p1          .              .              .             1.0000      
+p2          .              .              .             1.0000      
+p3          .              .              .             1.0000      
+p4          .              .              .             1.0000      
+p5          .              .              .             1.0000      
+p6          .              .              .             1.0000      
+p7          .              .              .             1.0000      
+
+---- EQU precedence  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p1          .              .            +INF            1.0000      
+p2          .              .            +INF            1.0000      
+p3          .              .            +INF            1.0000      
+p4          .              .            +INF            1.0000      
+p5          .              .            +INF            1.0000      
+p6          .              .            +INF            1.0000      
+
+---- EQU deftard  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p1          .            15.0000        +INF             .          
+p2          .            10.0000        +INF             .          
+p3          .             3.0000        +INF             .          
+p4          .             9.0000        +INF             .          
+p5          .             1.0000        +INF             .          
+p6          .             1.0000        +INF             .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/15/16 15:31:13 Page 10
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Solution Report     SOLVE sequence Using MIP From line 65
+
+
+     EQU deftard  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p7          .              .            +INF            1.0000      
+
+---- EQU deftardiness  
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p1          .              .            +INF            EPS         
+p2          .              .            +INF            EPS         
+p3          .              .            +INF            EPS         
+p4          .              .            +INF            EPS         
+p5          .              .            +INF            EPS         
+p6          .              .            +INF            EPS         
+p7          .              .            +INF            1.0000      
+
+---- VAR rank  job j has position k
+
+            LOWER          LEVEL          UPPER         MARGINAL
+
+1.p1          .              .            +INF            1.0000      
+1.p2          .             1.0000        +INF            EPS         
+1.p3          .              .            +INF            3.0000      
+1.p4          .              .            +INF            1.0000      
+1.p5          .              .            +INF           -3.0000      
+1.p6          .              .            +INF           -1.0000      
+1.p7          .              .            +INF           15.0000      
+2.p1          .              .            +INF            2.0000      
+2.p2          .              .            +INF            1.0000      
+2.p3          .              .            +INF            4.0000      
+2.p4          .              .            +INF            2.0000      
+2.p5          .              .            +INF           -2.0000      
+2.p6          .             1.0000        +INF            EPS         
+2.p7          .              .            +INF            5.0000      
+3.p1          .              .            +INF            4.0000      
+3.p2          .              .            +INF            3.0000      
+3.p3          .              .            +INF            6.0000      
+3.p4          .              .            +INF            4.0000      
+3.p5          .             1.0000        +INF            EPS         
+3.p6          .              .            +INF            2.0000      
+3.p7          .              .            +INF           13.0000      
+4.p1          .             1.0000        +INF            EPS         
+4.p2          .              .            +INF           -1.0000      
+4.p3          .              .            +INF            2.0000      
+4.p4          .              .            +INF            EPS         
+4.p5          .              .            +INF           -4.0000      
+4.p6          .              .            +INF           -2.0000      
+4.p7          .              .            +INF           14.0000      
+5.p1          .              .            +INF           -2.0000      
+5.p2          .              .            +INF           -3.0000      
+5.p3          .             1.0000        +INF            EPS         
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/15/16 15:31:13 Page 11
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Solution Report     SOLVE sequence Using MIP From line 65
+
+
+     VAR rank  job j has position k
+
+            LOWER          LEVEL          UPPER         MARGINAL
+
+5.p4          .              .            +INF           -2.0000      
+5.p5          .              .            +INF           -6.0000      
+5.p6          .              .            +INF           -4.0000      
+5.p7          .              .            +INF           17.0000      
+6.p1          .              .            +INF            EPS         
+6.p2          .              .            +INF           -1.0000      
+6.p3          .              .            +INF            2.0000      
+6.p4          .             1.0000        +INF            EPS         
+6.p5          .              .            +INF           -4.0000      
+6.p6          .              .            +INF           -2.0000      
+6.p7          .              .            +INF            9.0000      
+7.p1          .              .            +INF           -2.0000      
+7.p2          .              .            +INF           -3.0000      
+7.p3          .              .            +INF            EPS         
+7.p4          .              .            +INF           -2.0000      
+7.p5          .              .            +INF           -6.0000      
+7.p6          .              .            +INF           -4.0000      
+7.p7          .             1.0000        +INF            EPS         
+
+---- VAR start  start time of job in position k
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p1          .              .            +INF            1.0000      
+p2          .             4.0000        +INF             .          
+p3          .             9.0000        +INF             .          
+p4          .            11.0000        +INF             .          
+p5          .            15.0000        +INF             .          
+p6          .            23.0000        +INF             .          
+p7          .            29.0000        +INF             .          
+
+---- VAR comp  completion time of job in position k
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p1          .             4.0000        +INF             .          
+p2          .             9.0000        +INF             .          
+p3          .            11.0000        +INF             .          
+p4          .            15.0000        +INF             .          
+p5          .            23.0000        +INF             .          
+p6          .            29.0000        +INF             .          
+p7          .            31.0000        +INF             .          
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                   12/15/16 15:31:13 Page 12
+Sequencing on a single machine (Xpress Models: pp 128-132)
+Solution Report     SOLVE sequence Using MIP From line 65
+
+
+---- VAR tard  tardiness of job in position k
+
+          LOWER          LEVEL          UPPER         MARGINAL
+
+p1          .             9.0000        +INF             .          
+p2          .             9.0000        +INF             .          
+p3          .             9.0000        +INF             .          
+p4          .             9.0000        +INF             .          
+p5          .             9.0000        +INF             .          
+p6          .             9.0000        +INF             .          
+p7          .             9.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR tardiness         -INF            9.0000        +INF             .          
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        0.001 SECONDS      2 MB  24.7.4 r58773 DEX-DEG
+
+
+USER: CS 524 Course License                          G160914/0001AS-GEN
+      Prof. Ferris, UW-Madison, Fall 2016                        DC2937
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/quickstep/Documents/CS524/tostud/sequence1.gms
+Output     /Users/quickstep/Documents/CS524/tostud/sequence1.lst
