@@ -1,4 +1,4 @@
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 00:21:52 Page 1
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 17:22:59 Page 1
 hw8p1
 C o m p i l a t i o n
 
@@ -48,7 +48,7 @@ C o m p i l a t i o n
   44          v_eqn;
   45   
   46  D_eqn..
-  47          drag =e= 0.5*rho*v*v*C_d*s+ecd+ecu+ecv+ewt+eww+ewu+ewv+ve;
+  47          drag =e= 0.5*rho*v*v*C_d*s+ ecd + ecu + ecv + ewt + eww + ewu + ewv + ve;
   48   
   49  a_eqn..
   50          s*a =e= b*b;
@@ -56,7 +56,7 @@ C o m p i l a t i o n
   52  cd_eqn..
   53          a*s*C_d +ecd=g= a*(cda_0) + a*k*c_f* sw_s*s + (C_l*C_l/(pi*e))*s;
   54   
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 00:21:52 Page 2
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 17:22:59 Page 2
 hw8p1
 C o m p i l a t i o n
 
@@ -94,7 +94,7 @@ C o m p i l a t i o n
 
 
 COMPILATION TIME     =        0.000 SECONDS      2 MB  24.7.4 r58773 DEX-DEG
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 00:21:52 Page 3
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 17:22:59 Page 3
 hw8p1
 Model Statistics    SOLVE p1 Using NLP From line 76
 
@@ -108,11 +108,11 @@ DERIVATIVE POOL              20     CONSTANT POOL              27
 CODE LENGTH                  78
 
 
-GENERATION TIME      =        0.002 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
+GENERATION TIME      =        0.001 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
 
 
 EXECUTION TIME       =        0.002 SECONDS      3 MB  24.7.4 r58773 DEX-DEG
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 00:21:52 Page 4
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 17:22:59 Page 4
 hw8p1
 Solution Report     SOLVE p1 Using NLP From line 76
 
@@ -121,153 +121,101 @@ Solution Report     SOLVE p1 Using NLP From line 76
 
      MODEL   p1                  OBJECTIVE  drag
      TYPE    NLP                 DIRECTION  MINIMIZE
-     SOLVER  KNITRO              FROM LINE  76
+     SOLVER  CONOPT              FROM LINE  76
 
 **** SOLVER STATUS     1 Normal Completion         
 **** MODEL STATUS      2 Locally Optimal           
-**** OBJECTIVE VALUE             4940.0000
+**** OBJECTIVE VALUE             4940.0740
 
- RESOURCE USAGE, LIMIT          0.011      1000.000
- ITERATION COUNT, LIMIT         0    2000000000
+ RESOURCE USAGE, LIMIT          0.002      1000.000
+ ITERATION COUNT, LIMIT         6    2000000000
  EVALUATION ERRORS              0             0
-
-KNITRO           24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
-
-Artelys Knitro Optimizer 10.1.2
-
-=======================================
-          Commercial License
-         Artelys Knitro 10.1.2
-=======================================
-
-ERROR: User routine for grad_callback returned -502.
-       Could not evaluate first derivatives at the current point.
-       No further progress can be made.
-WARNING: Evaluation error in Knitro presolver.
-         No presolve will be applied.
-hessian_no_f:         1
-maxtime_real:         1000
-par_concurrent_evals: 0
-presolve:             0
-Knitro changing algorithm from AUTO to 1.
-Knitro changing bar_initpt from AUTO to 3.
-Knitro changing bar_murule from AUTO to 4.
-Knitro changing bar_penaltycons from AUTO to 1.
-Knitro changing bar_penaltyrule from AUTO to 2.
-Knitro changing bar_switchrule from AUTO to 2.
-Knitro changing linsolver from AUTO to 2.
-Knitro shifted start point to satisfy bounds (18 variables).
-
-Problem Characteristics
------------------------
-Objective goal:  Minimize
-Number of variables:                    18
-    bounded below:                      18
-    bounded above:                       0
-    bounded below and above:             0
-    fixed:                               0
-    free:                                0
-Number of constraints:                   8
-    linear equalities:                   0
-    nonlinear equalities:                4
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 00:21:52 Page 5
-hw8p1
-Solution Report     SOLVE p1 Using NLP From line 76
-
-
-    linear inequalities:                 2
-    nonlinear inequalities:              2
-    range:                               0
-Number of nonzeros in Jacobian:         34
-Number of nonzeros in Hessian:          20
-
-  Iter      Objective      FeasError   OptError    ||Step||    CGits 
---------  --------------  ----------  ----------  ----------  -------
-       0    8.510767e+00   6.807e+04
-      10    4.940001e+03   1.069e+01   6.800e-03   1.047e+02        0
-      20    4.940000e+03   4.778e-01   1.610e-04   3.494e-01        0
-      30    4.940000e+03   3.504e-04   4.342e-05   1.176e-03        0
-      40    4.940000e+03   5.763e-02   7.227e-03   2.453e-02        0
-      47    4.940000e+03   1.136e-04   4.732e-09   1.462e-02        8
-
-EXIT: Locally optimal solution found.
-
-Final Statistics
-----------------
-Final objective value               =   4.94000000005777e+03
-Final feasibility error (abs / rel) =   1.14e-04 / 1.67e-09
-Final optimality error  (abs / rel) =   4.73e-09 / 4.73e-09
-# of iterations                     =         47 
-# of CG iterations                  =         16 
-# of function evaluations           =         78
-# of gradient evaluations           =         49
-# of Hessian evaluations            =         48
-Total program time (secs)           =       0.00610 (     0.006 CPU time)
-Time spent in evaluations (secs)    =       0.00074
-
-===============================================================================
-
-Solve finished: status = optimal
-
-**** ERRORS/WARNINGS IN EQUATION cf_eqn
-     1 warning(s): vcPower: GRAD SINGULAR: x**c, x=0, 0<c<1
-
-**** ERRORS/WARNINGS IN EQUATION re_eqn
-     1 error(s): vcPower: FUNC DOMAIN: x**c, x < 0 (RETURNED 0)
+CONOPT 3         24.7.4 r58773 Released Sep 19, 2016 DEG x86 64bit/MacOS X    
+ 
+ 
+    C O N O P T 3   version 3.17A
+    Copyright (C)   ARKI Consulting and Development A/S
+                    Bagsvaerdvej 246 A
+                    DK-2880 Bagsvaerd, Denmark
+ 
+ 
+    The model has 19 variables and 9 constraints
+    with 46 Jacobian elements, 24 of which are nonlinear.
+    The Hessian of the Lagrangian has 7 elements on the diagonal,
+    13 elements below the diagonal, and 10 nonlinear variables.
+ 
+ ** Warning **  The number of nonlinear derivatives equal to zero
+                in the initial point is large (= 50 percent).
+                A better initial point will probably help the
+                optimization.
+ 
+ 
+                   Pre-triangular equations:   0
+                   Post-triangular equations:  1
+ 
+ 
+ ** Optimal solution. There are no superbasic variables.
+ 
+ 
+ CONOPT time Total                            0.001 seconds
+   of which: Function evaluations             0.000 =  0.0%
+             1st Derivative evaluations       0.000 =  0.0%
+ 
 
                            LOWER          LEVEL          UPPER         MARGINAL
 
 ---- EQU D_eqn               .              .              .             1.0000      
----- EQU a_eqn               .       -3.653069E-5          .       -8.587484E-6      
----- EQU cd_eqn              .             1.0632        +INF      4.4627850E-9      
----- EQU cf_eqn             0.0740         0.0739         0.0740   -6.611959E-8      
----- EQU re_eqn              .       -1.179044E-6          .       5.0009987E-7      
+---- EQU a_eqn               .              .              .              .          
+---- EQU cd_eqn              .              .            +INF            1.0000      
+---- EQU cf_eqn             0.0740         0.0740         0.0740         1.0000      
+---- EQU re_eqn              .              .              .              .          
 ---- EQU weight_eqn      4940.0000      4940.0000        +INF            1.0000      
----- EQU ww_eqn              .              .            +INF            0.8426      
----- EQU w_eqn               .              .              .            -0.9990      
----- EQU v_eqn             -INF      -2.777276E-5          .            -0.0002      
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 00:21:52 Page 6
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 17:22:59 Page 5
 hw8p1
 Solution Report     SOLVE p1 Using NLP From line 76
 
 
+---- EQU ww_eqn              .              .            +INF            1.0000      
+---- EQU w_eqn               .              .              .            -1.0000      
+---- EQU v_eqn             -INF             .              .             EPS         
+
                            LOWER          LEVEL          UPPER         MARGINAL
 
----- VAR s                   .       1.3888349E-5        +INF            0.0003      
----- VAR a                   .           105.4942        +INF      3.853626E-11      
----- VAR v                   .       3.4686173E-6        +INF            0.0001      
----- VAR C_d                 .          2932.6202        +INF            EPS         
----- VAR C_f                 .             0.4795        +INF      9.8682603E-9      
----- VAR C_l                 .            28.1042        +INF      1.155187E-12      
----- VAR R_e                 .       8.6851803E-5        +INF      6.1132880E-6      
----- VAR w                   .       2.5415288E-6        +INF            0.0010      
+---- VAR s                   .              .            +INF             .          
+---- VAR a                   .              .            +INF            0.0306      
+---- VAR v                   .              .            +INF            EPS         
+---- VAR C_d                 .              .            +INF            EPS         
+---- VAR C_f                 .              .            +INF            EPS         
+---- VAR C_l                 .              .            +INF            EPS         
+---- VAR R_e                 .              .            +INF            EPS         
+---- VAR w                   .              .            +INF            EPS         
 ---- VAR W_w                 .              .            +INF            1.0000      
----- VAR b                   .             0.0388        +INF      1.0627488E-7      
----- VAR ecd                 .              .            +INF            1.0000      
----- VAR eww                 .       2.5674556E-8        +INF            0.1574      
----- VAR ecu                 .              .            +INF            1.0000      
----- VAR ecv                 .              .            +INF            1.0000      
----- VAR ewt                 .          4940.0000        +INF      8.161686E-13      
----- VAR ve                  .              .            +INF            0.9998      
----- VAR ewu                 .              .            +INF            1.9990      
----- VAR ewv                 .       2.5438243E-6        +INF            0.0010      
----- VAR drag              -INF         4940.0000        +INF             .          
+---- VAR b                   .              .            +INF            EPS         
+---- VAR ecd                 .              .            +INF             .          
+---- VAR eww                 .              .            +INF             .          
+---- VAR ecu                 .             0.0740        +INF             .          
+---- VAR ecv                 .              .            +INF            2.0000      
+---- VAR ewt                 .          4940.0000        +INF             .          
+---- VAR ve                  .              .            +INF            1.0000      
+---- VAR ewu                 .              .            +INF            2.0000      
+---- VAR ewv                 .              .            +INF             .          
+---- VAR drag              -INF         4940.0740        +INF             .          
 
 
 **** REPORT SUMMARY :        0     NONOPT
                              0 INFEASIBLE
                              0  UNBOUNDED
-                             1     ERRORS ( ****)
-GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 00:21:52 Page 7
+                             0     ERRORS
+GAMS 24.7.4  r58773 Released Sep 19, 2016 DEX-DEG x86 64bit/MacOS X                                                                                                                                                                    12/16/16 17:22:59 Page 6
 hw8p1
 E x e c u t i o n
 
 
-----     79 VARIABLE s.L                   =  1.388835E-5  
+----     79 VARIABLE s.L                   =        0.000  
 
-----     80 VARIABLE a.L                   =      105.494  
+----     80 VARIABLE a.L                   =        0.000  
 
-----     81 VARIABLE b.L                   =        0.039  
+----     81 VARIABLE b.L                   =        0.000  
 
 
 EXECUTION TIME       =        0.001 SECONDS      2 MB  24.7.4 r58773 DEX-DEG
