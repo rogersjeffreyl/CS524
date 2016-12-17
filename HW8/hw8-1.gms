@@ -16,7 +16,7 @@ positive variables
 	s, 
 	a, 
 	v, 
-	C_d, 
+	c_d, 
 	C_f, 
 	C_l, 
 	R_e, 
@@ -37,29 +37,30 @@ equation
 	v_eqn;
 			
 D_eqn..
-    drag =e= .5*rho*sqr(V)*C_D*S;
+    drag =e= .5*rho*sqr(V)*c_d*S;
 cd_eqn..
-    1 =g= cda_0/(s*c_d) + k*C_f*sw_s/C_D + sqr(C_l)/(4*arctan(1)*(a)*e*c_d);
+    1 =g= cda_0/(s*c_d) + k*C_f*sw_s/c_d + sqr(C_l)/(4*arctan(1)*(a)*e*c_d);
 weight_eqn..
     1 =g= (W_0 + W_w)/w;
 ww_eqn..
-    1 =g= 45.42*s/W_w + (.0000871/W_w)*(n_lift*(a**1.5)*sqrt(w_0*w*s))/(tau);
+    1 =g= 45.42*s/W_w + (.0000871/w_w)*(n_lift*(a**1.5)*sqrt(w_0*w*s))/(tau);
 v_eqn..    
     1 =g= (2*W)/(rho*sqr(V_min)*S*cl_max);
+w_eqn..
+    1 =e= .5*rho*sqr(V)*c_l*s/w;
 cf_eqn..
     C_f*(R_e**.2)/.074 =e= 1;
 re_eqn..
     1 =e= (R_e*mu)/(rho*V*sqrt(S/A));
-w_eqn..
-    1 =e= .5*rho*sqr(V)*c_l*s/w;
+
 * setting bounds
 v.lo = v_min;
 C_l.up = cl_max;
 W.lo = W_0;
 s.lo = (2*W_0)/(rho*sqr(v_min)*cl_max);
 W_w.lo = 45.42*S.lo;
-c_d.lo = .000000000001;
-a.lo = 0.000000001;
+c_d.lo = .0001;
+a.lo = 0.0001;
 
 model geometric_standard /all/;
 option nlp=knitro;
